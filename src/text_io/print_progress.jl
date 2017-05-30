@@ -62,8 +62,4 @@ function print_progress(t_elapsed::Float64, current_diffuser::Int64, number_of_d
 	println(output_str)
 	
 	nothing
-	#percent_done::Float64 = 100.0 * fraction_done
-	
-			
 end
-			

@@ -3,7 +3,7 @@ include("file_io/read_xml_key.jl")
 include("file_io/write_xml_key.jl")
 
 include("file_io/read_xml_input.jl")
-include("file_io/read_xml_output.jl")
+include("file_io/read_xml_output_generation.jl")
 include("file_io/write_xml_output.jl")
 
 include("text_io/print_header.jl")
@@ -64,7 +64,7 @@ function wfrun_diffusion()
 		
 	# Print simulation stats.
 	if !silent_mode
-		print_simulation_stats_diffusion(particle_type, number_of_particles, number_of_diffusers, Lx, Ly, Lz, number_of_cells_x, number_of_cells_y, number_of_cells_z)
+		print_simulation_stats(particle_type, number_of_particles, number_of_diffusers, Lx, Ly, Lz, number_of_cells_x, number_of_cells_y, number_of_cells_z)
 	end
 	
 	# Simulate diffusion.
@@ -74,11 +74,11 @@ function wfrun_diffusion()
 	t_exec::Float64 = convert(Float64, t_finish_ns - t_start_ns) / 1e9
 	
 	# Write output.
-	write_xml_output_diffusion(output_diffusion_path, D0, D0_empirical, deltat_coarse, number_of_time_points_coarse, msd_x, msd_y, msd_z, t_exec)
+	write_xml_output(output_file_path, D0, D0_empirical, deltat_coarse, number_of_time_points_coarse, msd_x, msd_y, msd_z, t_exec)
 	
 	# Print output information.
 	if !silent_mode
-		println(join(("Output written to ", output_diffusion_path, ".")))
+		println(join(("Output written to ", output_file_path, ".")))
 		println("Finished.")
 	end
 	
