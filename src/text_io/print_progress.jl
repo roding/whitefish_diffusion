@@ -1,5 +1,5 @@
-function print_progress_diffusion(t_elapsed_diffusion::Float64, current_diffuser::Int64, number_of_diffusers::Int64)
-	time_elapsed_seconds::Int64 = convert(Int64, floor(t_elapsed_diffusion))
+function print_progress(t_elapsed::Float64, current_diffuser::Int64, number_of_diffusers::Int64)
+	time_elapsed_seconds::Int64 = convert(Int64, floor(t_elapsed))
 	
 	time_elapsed_hours::Int64 = fld(time_elapsed_seconds, 3600)
 	time_elapsed_seconds = time_elapsed_seconds - time_elapsed_hours * 3600
@@ -26,7 +26,7 @@ function print_progress_diffusion(t_elapsed_diffusion::Float64, current_diffuser
 	
 	fraction_done::Float64 = convert(Float64, current_diffuser) / convert(Float64, number_of_diffusers)
 	
-	time_remaining_seconds::Int64 = convert(Int64, round((1 - fraction_done) / fraction_done * t_elapsed_diffusion))
+	time_remaining_seconds::Int64 = convert(Int64, round((1 - fraction_done) / fraction_done * t_elapsed))
 	
 	time_remaining_hours::Int64 = fld(time_remaining_seconds, 3600)
 	time_remaining_seconds = time_remaining_seconds - time_remaining_hours * 3600
