@@ -1,14 +1,14 @@
 
-include("../io/read_xml_key.jl")
-include("../io/write_xml_key.jl")
+include("file_io/read_xml_key.jl")
+include("file_io/write_xml_key.jl")
 
-include("../io/read_xml_input_diffusion.jl")
-include("../io/read_xml_output_generation.jl")
-include("../io/write_xml_output_diffusion.jl")
+include("file_io/read_xml_input.jl")
+include("file_io/read_xml_output.jl")
+include("file_io/write_xml_output.jl")
 
-include("../io/print_header.jl")
-include("../io/print_simulation_stats_diffusion.jl")
-include("../io/print_progress_diffusion.jl")
+include("text_io/print_header.jl")
+include("text_io/print_simulation_stats.jl")
+include("text_io/print_progress.jl")
 
 include("ellipticaldisk/diffuse.jl")
 
@@ -25,8 +25,8 @@ function wfrun_diffusion()
 	# Process input arguments.
 	silent_mode::Bool = false
 	
-	input_diffusion_path::String = ""
-	input_diffusion_specified::Bool = false
+	input_file_path::String = ""
+	input_file_specified::Bool = false
 	
 	number_of_arguments::Int64 = length(ARGS)
 	
@@ -34,8 +34,8 @@ function wfrun_diffusion()
 		if ARGS[current_argument] == "-silent"
 			silent_mode = true
 		elseif isfile(ARGS[current_argument])
-			input_diffusion_path = ARGS[current_argument]
-			input_diffusion_specified = true
+			input_file_path = ARGS[current_argument]
+			input_file_specified = true
 		end
 	end
 	
@@ -45,16 +45,16 @@ function wfrun_diffusion()
 	end
 	
 	# Error checking for input file specification.
-	if !input_diffusion_specified
+	if !input_file_specified
 		println("No input file specified or specified input does not exist. Aborting.")
 		return nothing
 	end
 
 	# Process input file.
 	if !silent_mode
-		println(join(("Reading input from file ", input_diffusion_path, "...")))
+		println(join(("Reading input from file ", input_file_path, "...")))
 	end
-	(output_generation_path::String, D0::Float64, deltat_coarse::Float64, number_of_time_points_coarse::Int64, number_of_time_points_fine_per_coarse::Int64, number_of_diffusers::Int64, number_of_cells_x::Int64, number_of_cells_y::Int64, number_of_cells_z::Int64, output_diffusion_path::String) = read_xml_input_diffusion(input_diffusion_path)
+	(output_generation_path::String, D0::Float64, deltat_coarse::Float64, number_of_time_points_coarse::Int64, number_of_time_points_fine_per_coarse::Int64, number_of_diffusers::Int64, number_of_cells_x::Int64, number_of_cells_y::Int64, number_of_cells_z::Int64, output_file_path::String) = read_xml_input(input_file_path)
 	
 	# Process particle system file.
 	if !silent_mode
