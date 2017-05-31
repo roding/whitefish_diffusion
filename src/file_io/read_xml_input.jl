@@ -14,5 +14,5 @@ function read_xml_input(file_path::String)
 	number_of_cells_z::Int64 = read_xml_key(file_string, "number_of_cells_z", Int64)
 	output_file_path::String = read_xml_key(file_string, "output_file_path", String)
 	
-	return (output_generation_path, inherent_diffusion_coefficient, deltat_coarse, number_of_time_points_coarse, number_of_time_points_fine_per_coarse, number_of_diffusers, number_of_cells_x, number_of_cells_y, number_of_cells_z, output_diffusion_path)
+	return (output_generation_path, inherent_diffusion_coefficient, deltat_coarse, number_of_time_points_coarse, number_of_time_points_fine_per_coarse, number_of_diffusers, number_of_cells_x, number_of_cells_y, number_of_cells_z, output_file_path)
 end

@@ -1,6 +1,6 @@
-include("../src/io/write_xml_key.jl")
-include("../src/io/write_xml_input.jl")
-include("../src/io/write_xml_input_generation.jl")
+include("../src/file_io/write_xml_key.jl")
+include("../src/file_io/write_xml_input.jl")
+include("../src/file_io/read_xml_output_generation.jl")
 
 function run_diffusion()
 	# Inititalization of random number generation device.
@@ -32,12 +32,12 @@ function run_diffusion()
 	# Write input file for diffusion.
 	output_generation_path::String = joinpath(output_dir, "output_generation.xml")
 	input_file_path::String = joinpath(output_dir, "input_diffusion.xml")
-	write_xml_input_diffusion(input_file_path, output_generation_path, D0, deltat_coarse, number_of_time_points_coarse, number_of_time_points_fine_per_coarse, number_of_diffusers, number_of_cells_x, number_of_cells_y, number_of_cells_z, output_file_path)
+	write_xml_input(input_file_path, output_generation_path, D0, deltat_coarse, number_of_time_points_coarse, number_of_time_points_fine_per_coarse, number_of_diffusers, number_of_cells_x, number_of_cells_y, number_of_cells_z, output_file_path)
 	
 	# Run diffusion.
 	program_path::String = abspath("../src/wfrun_diffusion.jl")
 	cmd::Cmd = `julia $program_path $input_file_path`
-	run(cmd_diffusion)
+	run(cmd)
 	
 	# Exit.
 	nothing
