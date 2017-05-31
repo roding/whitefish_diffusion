@@ -23,7 +23,7 @@ function run_diffusion()
 	deltat_coarse::Float64 = 5.0
 	number_of_time_points_coarse::Int64 = 20000
 	number_of_time_points_fine_per_coarse::Int64 = 5#125
-	number_of_diffusers::Int64 = 256000
+	number_of_diffusers::Int64 = 4000
 	number_of_cells_x::Int64 = 10
 	number_of_cells_y::Int64 = 10
 	number_of_cells_z::Int64 = 10
