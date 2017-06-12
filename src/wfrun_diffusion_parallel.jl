@@ -10,9 +10,9 @@ include("text_io/print_header.jl")
 include("text_io/print_simulation_stats.jl")
 include("text_io/print_progress.jl")
 
-include("ellipticaldisk/diffuse.jl")
+@everywhere include("ellipticaldisk/diffuse.jl")
 
-function wfrun_diffusion()
+function wfrun_diffusion_parallel()
 	# Inititalization of random number generation device.
 	const random_seed::Int64 = convert(Int64, time_ns())
 	srand(random_seed)
@@ -69,6 +69,11 @@ function wfrun_diffusion()
 	end
 	
 	# Simulate diffusion.
+	number_of_workers::Int64 = nworkers() # This is determined by the the '-p' input flag to Julia.
+	number_of_diffusers_per_worker::Array{Int64, 1} = convert(Int64, floor(number_of_diffusers/number_of_workers))
+	number_of_diffusers_per_worker[1] = number_of_diffusers_per_worker[1] + number_of_diffusers - sum(number_of_diffusers_per_worker)
+	println(number_of_diffusers_per_worker)	
+	
 	t_start_ns::Int64 = convert(Int64, time_ns())
 	(msd_x::Array{Float64, 1}, msd_y::Array{Float64, 1}, msd_z::Array{Float64, 1}, D0_empirical::Float64) = diffuse(X, Y, Z, THETA1, THETA2, THETA3, R1, R2, Lx, Ly, Lz, D0, deltat_coarse, number_of_time_points_coarse, number_of_time_points_fine_per_coarse, number_of_diffusers, number_of_cells_x, number_of_cells_y, number_of_cells_z, silent_mode)	
 	t_finish_ns::Int64 = convert(Int64, time_ns())
@@ -86,4 +91,4 @@ function wfrun_diffusion()
 	nothing
 end
 
-wfrun_diffusion()
+wfrun_diffusion_parallel()
