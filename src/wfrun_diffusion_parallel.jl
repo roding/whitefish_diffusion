@@ -9,11 +9,12 @@ include("file_io/write_xml_output.jl")
 include("text_io/print_header.jl")
 include("text_io/print_simulation_stats.jl")
 
-#@everywhere println(Base.source_path())
-@everywhere (program_file_dir, program_file_name) = splitdir(PROGRAM_FILE)
-#@everywhere println(program_file_dir)
-@everywhere include(joinpath(program_file_dir, "../src/text_io/print_progress.jl"))
-@everywhere include(joinpath(program_file_dir, "../src/ellipticaldisk/diffuse.jl"))
+foo = @__FILE__
+@eval @everywhere f = $foo
+@everywhere println(f)
+@everywhere (program_file_dir, program_file_name) = splitdir(f)
+@everywhere include(joinpath(program_file_dir, "text_io/print_progress.jl"))
+@everywhere include(joinpath(program_file_dir, "ellipticaldisk/diffuse.jl"))
 
 function wfrun_diffusion_parallel()
 	# Inititalization of random number generation device.
