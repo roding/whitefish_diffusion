@@ -2,7 +2,7 @@ include("../src/file_io/write_xml_key.jl")
 include("../src/file_io/write_xml_input.jl")
 include("../src/file_io/read_xml_output_generation.jl")
 
-function run_diffusion()
+function run_diffusion_parallel(number_of_workers::Int64)
 	# Inititalization of random number generation device.
 	random_seed::Int64 = convert(Int64, time_ns())
 	srand(random_seed)
@@ -23,7 +23,7 @@ function run_diffusion()
 	deltat_coarse::Float64 = 5.0
 	number_of_time_points_coarse::Int64 = 20000
 	number_of_time_points_fine_per_coarse::Int64 = 5#125
-	number_of_diffusers::Int64 = 4000
+	number_of_diffusers::Int64 = 4013
 	number_of_cells_x::Int64 = 10
 	number_of_cells_y::Int64 = 10
 	number_of_cells_z::Int64 = 10
@@ -35,8 +35,8 @@ function run_diffusion()
 	write_xml_input(input_file_path, output_generation_path, D0, deltat_coarse, number_of_time_points_coarse, number_of_time_points_fine_per_coarse, number_of_diffusers, number_of_cells_x, number_of_cells_y, number_of_cells_z, output_file_path)
 	
 	# Run diffusion.
-	program_path::String = abspath("../src/wfrun_diffusion.jl")
-	cmd::Cmd = `julia $program_path $input_file_path`
+	program_path::String = abspath("../src/wfrun_diffusion_parallel.jl")
+	cmd::Cmd = `julia -p $number_of_workers $program_path $input_file_path`
 	run(cmd)
 	
 	# Exit.
@@ -44,4 +44,4 @@ function run_diffusion()
 	
 end
 
-run_diffusion()
+run_diffusion_parallel(4)
