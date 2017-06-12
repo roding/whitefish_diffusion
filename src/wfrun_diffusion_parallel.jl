@@ -8,9 +8,9 @@ include("file_io/write_xml_output.jl")
 
 include("text_io/print_header.jl")
 include("text_io/print_simulation_stats.jl")
-include("../src/text_io/print_progress.jl")
 
-include("../src/ellipticaldisk/diffuse_parallel.jl")
+@everywhere include("../src/text_io/print_progress.jl")
+@everywhere include("../src/ellipticaldisk/diffuse.jl")
 
 function wfrun_diffusion_parallel()
 	# Inititalization of random number generation device.
@@ -76,57 +76,48 @@ function wfrun_diffusion_parallel()
 	
 	t_start_ns::Int64 = convert(Int64, time_ns())
 	
-	(msd_x::Array{Float64, 1}, msd_y::Array{Float64, 1}, msd_z::Array{Float64, 1}, D0_empirical::Float64) = diffuse_parallel(
-		X, 
-		Y, 
-		Z, 
-		THETA1, 
-		THETA2, 
-		THETA3, 
-		R1, 
-		R2, 
-		Lx, 
-		Ly, 
-		Lz, 
-		D0, 
-		deltat_coarse, 
-		number_of_time_points_coarse, 
-		number_of_time_points_fine_per_coarse, 
-		number_of_diffusers_per_worker, 
-		number_of_cells_x, 
-		number_of_cells_y, 
-		number_of_cells_z, 
-		silent_mode)
-	
-#	(msd_x::Array{Float64, 1}, msd_y::Array{Float64, 1}, msd_z::Array{Float64, 1}, D0_empirical::Float64) = @parallel (+) for current_worker = 1:number_of_workers
-#		diffuse(
-#			X, 
-#			Y, 
-#			Z, 
-#			THETA1, 
-#			THETA2, 
-#			THETA3, 
-#			R1, 
-#			R2, 
-#			Lx, 
-#			Ly, 
-#			Lz, 
-#			D0, 
-#			deltat_coarse, 
-#			number_of_time_points_coarse, 
-#			number_of_time_points_fine_per_coarse, 
-#			number_of_diffusers_per_worker[current_worker], 
-#			number_of_cells_x, 
-#			number_of_cells_y, 
-#			number_of_cells_z, 
-#			silent_mode)
-#	end
+	msd_x = SharedArray(Float64, number_of_time_points_coarse)
+	msd_y = SharedArray(Float64, number_of_time_points_coarse)
+	msd_z = SharedArray(Float64, number_of_time_points_coarse)
+	D0_empirical = SharedArray(Float64, 1)
+		
+	@sync @parallel for current_worker = 1:number_of_workers
+		(msd_x_, msd_y_, msd_z_, D0_empirical_) = diffuse(
+			X, 
+			Y, 
+			Z, 
+			THETA1, 
+			THETA2, 
+			THETA3, 
+			R1, 
+			R2, 
+			Lx, 
+			Ly, 
+			Lz, 
+			D0, 
+			deltat_coarse, 
+			number_of_time_points_coarse, 
+			number_of_time_points_fine_per_coarse, 
+			number_of_diffusers_per_worker[current_worker], 
+			number_of_cells_x, 
+			number_of_cells_y, 
+			number_of_cells_z, 
+			silent_mode)
+		
+		for i = 1:number_of_time_points_coarse
+			msd_x[i] = msd_x[i] + convert(Float64, number_of_diffusers_per_worker[current_worker]) / convert(Float64, number_of_diffusers) * msd_x_[i]
+			msd_y[i] = msd_y[i] + convert(Float64, number_of_diffusers_per_worker[current_worker]) / convert(Float64, number_of_diffusers) * msd_y_[i]
+			msd_z[i] = msd_z[i] + convert(Float64, number_of_diffusers_per_worker[current_worker]) / convert(Float64, number_of_diffusers) * msd_z_[i]
+		end
+		D0_empirical[1] = D0_empirical[1] + convert(Float64, number_of_diffusers_per_worker[current_worker]) / convert(Float64, number_of_diffusers) * D0_empirical_
+	end
 	
 	t_finish_ns::Int64 = convert(Int64, time_ns())
 	t_exec::Float64 = convert(Float64, t_finish_ns - t_start_ns) / 1e9
 	
 	# Write output.
-	write_xml_output(output_file_path, D0, D0_empirical, deltat_coarse, number_of_time_points_coarse, msd_x, msd_y, msd_z, t_exec)
+	
+	write_xml_output(output_file_path, D0, convert(Float64, D0_empirical[1]), deltat_coarse, number_of_time_points_coarse, convert(Array{Float64, 1}, msd_x), convert(Array{Float64, 1}, msd_y), convert(Array{Float64, 1}, msd_z), t_exec)
 	
 	# Print output information.
 	if !silent_mode
