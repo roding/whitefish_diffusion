@@ -261,14 +261,14 @@ include("cell_lists.jl")
 			trajectory_y[current_time_coarse] = y_abs
 			trajectory_z[current_time_coarse] = z_abs
 			
-			#msd_x[current_time_coarse] += (trajectory_x[current_time_coarse] - trajectory_x[1])^2
-			#msd_y[current_time_coarse] += (trajectory_y[current_time_coarse] - trajectory_y[1])^2
-			#msd_z[current_time_coarse] += (trajectory_z[current_time_coarse] - trajectory_z[1])^2
-			for i = 2:current_time_coarse
-                msd_x[i] += (trajectory_x[current_time_coarse] - trajectory_x[current_time_coarse - i + 1])^2
-                msd_y[i] += (trajectory_y[current_time_coarse] - trajectory_y[current_time_coarse - i + 1])^2
-                msd_z[i] += (trajectory_z[current_time_coarse] - trajectory_z[current_time_coarse - i + 1])^2
-            end
+			msd_x[current_time_coarse] += (trajectory_x[current_time_coarse] - trajectory_x[1])^2
+			msd_y[current_time_coarse] += (trajectory_y[current_time_coarse] - trajectory_y[1])^2
+			msd_z[current_time_coarse] += (trajectory_z[current_time_coarse] - trajectory_z[1])^2
+			#for i = 2:current_time_coarse
+            #    msd_x[i] += (trajectory_x[current_time_coarse] - trajectory_x[current_time_coarse - i + 1])^2
+            #    msd_y[i] += (trajectory_y[current_time_coarse] - trajectory_y[current_time_coarse - i + 1])^2
+            #    msd_z[i] += (trajectory_z[current_time_coarse] - trajectory_z[current_time_coarse - i + 1])^2
+            #end
 		end
 		
 		t_elapsed_diffusion = convert(Float64, time_ns()) / 1e9 - t_start_diffusion
@@ -279,12 +279,12 @@ include("cell_lists.jl")
 	end
 	print_progress(t_elapsed_diffusion, number_of_diffusers, number_of_diffusers)
 	
-	#msd_x = msd_x ./ convert(Float64, number_of_diffusers)
-	#msd_y = msd_y ./ convert(Float64, number_of_diffusers)
-	#msd_z = msd_z ./ convert(Float64, number_of_diffusers)
-	msd_x = msd_x ./ (convert(Float64, number_of_diffusers) .* (number_of_time_points_coarse:-1:1))
-	msd_y = msd_y ./ (convert(Float64, number_of_diffusers) .* (number_of_time_points_coarse:-1:1))
-	msd_z = msd_z ./ (convert(Float64, number_of_diffusers) .* (number_of_time_points_coarse:-1:1))
+	msd_x = msd_x ./ convert(Float64, number_of_diffusers)
+	msd_y = msd_y ./ convert(Float64, number_of_diffusers)
+	msd_z = msd_z ./ convert(Float64, number_of_diffusers)
+	#msd_x = msd_x ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
+	#msd_y = msd_y ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
+	#msd_z = msd_z ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
 	
 	D0_empirical = D0_empirical / (3.0 * convert(Float64, number_of_diffusers * (number_of_time_points_coarse-1) * number_of_time_points_fine_per_coarse) * 2.0 * deltat_fine)
 		

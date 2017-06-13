@@ -20,10 +20,10 @@ function run_diffusion_parallel(number_of_workers::Int64)
 	
 	# Diffusion parameters.
 	D0::Float64 = 1.0
-	deltat_coarse::Float64 = 5.0
-	number_of_time_points_coarse::Int64 = 20000
-	number_of_time_points_fine_per_coarse::Int64 = 5#125
-	number_of_diffusers::Int64 = 4013
+	deltat_coarse::Float64 = 0.25
+	number_of_time_points_coarse::Int64 = 50000
+	number_of_time_points_fine_per_coarse::Int64 = 100
+	number_of_diffusers::Int64 = 10000#100000
 	number_of_cells_x::Int64 = 10
 	number_of_cells_y::Int64 = 10
 	number_of_cells_z::Int64 = 10
@@ -44,4 +44,4 @@ function run_diffusion_parallel(number_of_workers::Int64)
 	
 end
 
-run_diffusion_parallel(4)
+run_diffusion_parallel(88)
