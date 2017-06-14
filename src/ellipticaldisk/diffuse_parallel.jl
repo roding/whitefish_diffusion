@@ -1,6 +1,6 @@
 include("cell_lists.jl")
 
-@inbounds function diffuse(	X::Array{Float64,1},
+function diffuse_parallel(	X::Array{Float64,1},
 							Y::Array{Float64,1},
 							Z::Array{Float64,1},
 							THETA1::Array{Float64,1},
@@ -279,14 +279,16 @@ include("cell_lists.jl")
 	end
 	print_progress(t_elapsed_diffusion, number_of_diffusers, number_of_diffusers)
 
-	msd_x = msd_x ./ convert(Float64, number_of_diffusers)
-	msd_y = msd_y ./ convert(Float64, number_of_diffusers)
-	msd_z = msd_z ./ convert(Float64, number_of_diffusers)
+	#msd_x = msd_x ./ convert(Float64, number_of_diffusers)
+	#msd_y = msd_y ./ convert(Float64, number_of_diffusers)
+	#msd_z = msd_z ./ convert(Float64, number_of_diffusers)
 	#msd_x = msd_x ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
 	#msd_y = msd_y ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
 	#msd_z = msd_z ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
 
-	D0_empirical = D0_empirical / (3.0 * convert(Float64, number_of_diffusers * (number_of_time_points_coarse-1) * number_of_time_points_fine_per_coarse) * 2.0 * deltat_fine)
-
-	return (msd_x, msd_y, msd_z, D0_empirical)
+	#D0_empirical = D0_empirical / (3.0 * convert(Float64, number_of_diffusers * (number_of_time_points_coarse-1) * number_of_time_points_fine_per_coarse) * 2.0 * deltat_fine)
+	#println(sum(msd_z))
+	output::Array{Float64, 1} = vcat(msd_x, msd_y, msd_z, D0_empirical)
+	println(sum(output))
+	return output
 end
