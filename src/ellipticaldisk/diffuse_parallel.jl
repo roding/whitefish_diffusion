@@ -289,6 +289,5 @@ function diffuse_parallel(	X::Array{Float64,1},
 	#D0_empirical = D0_empirical / (3.0 * convert(Float64, number_of_diffusers * (number_of_time_points_coarse-1) * number_of_time_points_fine_per_coarse) * 2.0 * deltat_fine)
 	#println(sum(msd_z))
 	output::Array{Float64, 1} = vcat(msd_x, msd_y, msd_z, D0_empirical)
-	println(sum(output))
 	return output
 end
