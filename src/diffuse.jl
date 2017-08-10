@@ -48,10 +48,10 @@ function diffuse(particle_type::String,
 	trajectory_x::Array{Float64} = zeros(number_of_time_points_coarse)
 	trajectory_y::Array{Float64} = zeros(number_of_time_points_coarse)
 	trajectory_z::Array{Float64} = zeros(number_of_time_points_coarse)
-	msd::Array{Float64} = zeros(number_of_time_points_coarse)
-	msd_x::Array{Float64} = zeros(number_of_time_points_coarse)
-	msd_y::Array{Float64} = zeros(number_of_time_points_coarse)
-	msd_z::Array{Float64} = zeros(number_of_time_points_coarse)
+	ssd::Array{Float64} = zeros(number_of_time_points_coarse)
+	ssd_x::Array{Float64} = zeros(number_of_time_points_coarse)
+	ssd_y::Array{Float64} = zeros(number_of_time_points_coarse)
+	ssd_z::Array{Float64} = zeros(number_of_time_points_coarse)
 	D0_empirical::Float64 = 0.0
 
 	t_start_diffusion::Float64 = convert(Float64, time_ns()) / 1e9
@@ -157,10 +157,10 @@ function diffuse(particle_type::String,
 			trajectory_y[current_time_coarse] = y_abs
 			trajectory_z[current_time_coarse] = z_abs
 
-			msd[current_time_coarse] += (trajectory_x[current_time_coarse] - trajectory_x[1])^2 + (trajectory_y[current_time_coarse] - trajectory_y[1])^2 + (trajectory_z[current_time_coarse] - trajectory_z[1])^2
-			msd_x[current_time_coarse] += (trajectory_x[current_time_coarse] - trajectory_x[1])^2
-			msd_y[current_time_coarse] += (trajectory_y[current_time_coarse] - trajectory_y[1])^2
-			msd_z[current_time_coarse] += (trajectory_z[current_time_coarse] - trajectory_z[1])^2
+			ssd[current_time_coarse] += (trajectory_x[current_time_coarse] - trajectory_x[1])^2 + (trajectory_y[current_time_coarse] - trajectory_y[1])^2 + (trajectory_z[current_time_coarse] - trajectory_z[1])^2
+			ssd_x[current_time_coarse] += (trajectory_x[current_time_coarse] - trajectory_x[1])^2
+			ssd_y[current_time_coarse] += (trajectory_y[current_time_coarse] - trajectory_y[1])^2
+			ssd_z[current_time_coarse] += (trajectory_z[current_time_coarse] - trajectory_z[1])^2
 		end
 
 		#t_elapsed_diffusion = convert(Float64, time_ns()) / 1e9 - t_start_diffusion
@@ -170,6 +170,6 @@ function diffuse(particle_type::String,
 		#chunk = convert(Int64, floor(t_elapsed_diffusion / 10.0))
 	end
 
-	output::Array{Float64, 1} = vcat(msd, msd_x, msd_y, msd_z, D0_empirical)
+	output::Array{Float64, 1} = vcat(ssd, ssd_x, ssd_y, ssd_z, D0_empirical)
 	return output
 end
