@@ -59,7 +59,9 @@ function diffuse(particle_type::String,
 
 	chunk::Int64 = 0
 	for current_diffuser = 1:number_of_diffusers
-		println(current_diffuser)
+		if mod(current_diffuser, 100) == 0
+			println(current_diffuser)
+		end
 
 		# Pick random, valid initial position.
 		if particle_type == "sphere"
