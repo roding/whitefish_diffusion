@@ -51,7 +51,7 @@ function run_diffusion()
 		output_file_path::String) = read_input(input_file_path)
 
 	# Read generation output from file.
-	println(join(("Reading diffusion input from file ", output_generation_path, "...")))
+	println(join(("Reading generation output from file ", output_generation_path, "...")))
 	(	particle_type::String,
 		R::Array{Float64, 2},
 		Lx::Float64,
@@ -74,45 +74,48 @@ function run_diffusion()
 	number_of_diffusers_per_worker[1:number_of_diffusers_remaining] += 1
 	println(number_of_diffusers_per_worker)
 
-#	output::Array{Float64, 1} = zeros(4*number_of_time_points_coarse+1)
-#	output = @parallel (+) for current_worker = 1:number_of_workers
-#		diffuse(
-#			X,
-#			Y,
-#			Z,
-#			THETA1,
-#			THETA2,
-#			THETA3,
-#			R1,
-#			R2,
-#			Lx,
-#			Ly,
-#			Lz,
-#			D0,
-#			deltat_coarse,
-#			number_of_time_points_coarse,
-#			number_of_time_points_fine_per_coarse,
-#			number_of_diffusers_per_worker[current_worker],
-#			number_of_cells_x,
-#			number_of_cells_y,
-#			number_of_cells_z,
-#			silent_mode)
-#	end
-#	msd_x::Array{Float64, 1} = output[1:number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)
-#	msd_y::Array{Float64, 1} = output[number_of_time_points_coarse+1:2*number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)
-#	msd_z::Array{Float64, 1} = output[2*number_of_time_points_coarse+1:3*number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)
-#	deltat_fine::Float64 = deltat_coarse / convert(Float64, number_of_time_points_fine_per_coarse)
-#	D0_empirical::Float64 = output[end] / (3.0 * convert(Float64, number_of_diffusers * (number_of_time_points_coarse-1) * number_of_time_points_fine_per_coarse) * 2.0 * deltat_fine)
-#	t_finish_ns::Int64 = convert(Int64, time_ns())
-#	t_exec::Float64 = convert(Float64, t_finish_ns - t_start_ns) / 1e9
+	output::Array{Float64, 1} = zeros(4*number_of_time_points_coarse+1)
+	output = @parallel (+) for current_worker = 1:number_of_workers
+		diffuse(
+			particle_type,
+			R,
+			Lx,
+			Ly,
+			Lz,
+			X,
+			Y,
+			Z,
+			Q0,
+			Q1,
+			Q2,
+			Q3,
+			D0,
+			deltat_coarse,
+			number_of_time_points_coarse,
+			number_of_time_points_fine_per_coarse,
+			number_of_diffusers_per_worker[current_worker])
+	end
+	msd::Array{Float64, 1} = output[1:number_of_time_points_coarse] ./ convert(Float64, 3 * number_of_diffusers)
+	msd_x::Array{Float64, 1} = output[number_of_time_points_coarse+1:2*number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)
+	msd_y::Array{Float64, 1} = output[2*number_of_time_points_coarse+1:3*number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)
+	msd_z::Array{Float64, 1} = output[3*number_of_time_points_coarse+1:4*number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)
+	deltat_fine::Float64 = deltat_coarse / convert(Float64, number_of_time_points_fine_per_coarse)
+	D0_empirical::Float64 = output[end] / (3.0 * convert(Float64, number_of_diffusers * (number_of_time_points_coarse-1) * number_of_time_points_fine_per_coarse) * 2.0 * deltat_fine)
+	t_finish_ns::Int64 = convert(Int64, time_ns())
+	t_exec::Float64 = convert(Float64, t_finish_ns - t_start_ns) / 1e9
 
 	# Write output.
-
-	#write_output(output_file_path, D0, convert(Float64, D0_empirical[1]), deltat_coarse, number_of_time_points_coarse, convert(Array{Float64, 1}, msd_x), convert(Array{Float64, 1}, msd_y), convert(Array{Float64, 1}, msd_z), t_exec)
-	#write_output(output_file_path, D0, sdata(D0_empirical)[1], deltat_coarse, number_of_time_points_coarse, sdata(msd_x), sdata(msd_y), sdata(msd_z), t_exec)
-#	write_output(output_file_path, D0, D0_empirical, deltat_coarse, number_of_time_points_coarse, msd_x, msd_y, msd_z, t_exec)
-
-	# Print output information.
+	diagnostic_diffusion_coefficient_ratio::Float64 = D0_empirical / D0
+	write_output(
+		output_file_path,
+		diagnostic_diffusion_coefficient_ratio,
+		deltat_coarse,
+		number_of_time_points_coarse,
+		msd,
+		msd_x,
+		msd_y,
+		msd_z,
+		t_exec)
 	println(join(("Output written to ", output_file_path, ".")))
 	println("Finished.")
 

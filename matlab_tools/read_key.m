@@ -1,4 +1,4 @@
-function val = read_xml_key(file_string, key_name, fmt)
+function val = read_key(file_string, key_name, fmt)
 
 pattern_before = ['<' key_name '>'];
 pattern_after = ['</' key_name '>'];

@@ -12,9 +12,9 @@ function diffuse(particle_type::String,
 	Q3::Array{Float64, 1},
 	D0::Float64,
 	deltat_coarse::Float64,
+	number_of_time_points_coarse::Int64,
 	number_of_time_points_fine_per_coarse::Int64,
-	number_of_diffusers::Int64,
-	number_of_time_points_coarse::Int64)
+	number_of_diffusers::Int64)
 
 	# Number of particles.
 	number_of_particles::Int64 = length(X)
@@ -168,6 +168,6 @@ function diffuse(particle_type::String,
 		#chunk = convert(Int64, floor(t_elapsed_diffusion / 10.0))
 	end
 
-	output::Array{Float64, 1} = vcat(msd_x, msd_y, msd_z, D0_empirical)
+	output::Array{Float64, 1} = vcat(msd, msd_x, msd_y, msd_z, D0_empirical)
 	return output
 end
