@@ -12,6 +12,7 @@ foo = @__FILE__
 @everywhere println(f)
 @everywhere (program_file_dir, program_file_name) = splitdir(f)
 @everywhere include(joinpath(program_file_dir, "diffuse.jl"))
+@everywhere include(joinpath(program_file_dir, "signed_distance_mod.jl"))
 
 function run_diffusion()
 	# Inititalization of random number generation device.
