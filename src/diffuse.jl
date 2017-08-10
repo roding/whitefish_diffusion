@@ -1,83 +1,32 @@
-include("cell_lists.jl")
+function diffuse(particle_type::String,
+	R::Array{Float64, 2},
+	Lx::Float64,
+	Ly::Float64,
+	Lz::Float64,
+	X::Array{Float64, 1},
+	Y::Array{Float64, 1},
+	Z::Array{Float64, 1},
+	Q0::Array{Float64, 1},
+	Q1::Array{Float64, 1},
+	Q2::Array{Float64, 1},
+	Q3::Array{Float64, 1},
+	D0::Float64,
+	deltat_coarse::Float64,
+	number_of_time_points_fine_per_coarse::Int64,
+	number_of_diffusers::Int64,
+	number_of_time_points_coarse::Int64)
 
-@inbounds function diffuse(	X::Array{Float64,1},
-							Y::Array{Float64,1},
-							Z::Array{Float64,1},
-							THETA1::Array{Float64,1},
-							THETA2::Array{Float64,1},
-							THETA3::Array{Float64,1},
-							R1::Array{Float64,1},
-							R2::Array{Float64,1},
-							Lx::Float64,
-							Ly::Float64,
-							Lz::Float64,
-							D0::Float64,
-							deltat_coarse::Float64,
-							number_of_time_points_coarse::Int64,
-							number_of_time_points_fine_per_coarse::Int64,
-							number_of_diffusers::Int64,
-							number_of_cells_x::Int64,
-							number_of_cells_y::Int64,
-							number_of_cells_z::Int64,
-							silent_mode::Bool)
-
-	if !silent_mode
-		println("Preparing simulation...")
-	end
-	# Elliptical disk parameters.
-	const number_of_particles::Int64 = length(X)
-	const RMAX = Array(Float64,number_of_particles)
-	for current_particle = 1:number_of_particles
-		RMAX[current_particle] = maximum((R1[current_particle], R2[current_particle]))
-	end
-
-	const c1::Array{Float64,1} = cos(THETA1)
-	const c2::Array{Float64,1} = cos(THETA2)
-	const c3::Array{Float64,1} = cos(THETA3)
-	const s1::Array{Float64,1} = sin(THETA1)
-	const s2::Array{Float64,1} = sin(THETA2)
-	const s3::Array{Float64,1} = sin(THETA3)
-
-	const q11::Array{Float64,1} = c2.*c3
-	const q12::Array{Float64,1} = -c2.*s3
-	const q13::Array{Float64,1} = s2
-	const q21::Array{Float64,1} = c1.*s3 + c3.*s1.*s2
-	const q22::Array{Float64,1} = c1.*c3 - s1.*s2.*s3
-	const q23::Array{Float64,1} = -c2.*s1
-	const q31::Array{Float64,1} = s1.*s3 - c1.*c3.*s2
-	const q32::Array{Float64,1} = c3.*s1 + c1.*s2.*s3
-	const q33::Array{Float64,1} = c1.*c2
+	# Number of particles.
+	number_of_particles::Int64 = length(X)
 
 	# Standard deviation of Gaussian jumps.
 	const deltat_fine::Float64 = deltat_coarse / convert(Float64, number_of_time_points_fine_per_coarse)
 	const sigma::Float64 = sqrt(2 * D0 * deltat_fine)
 
-	# Create cell lists.
-	if !silent_mode
-		println("Creating cell lists...")
-	end
-	cell_overlap::Float64 = 6 * sigma
-	lists = cell_lists(	X,
-						Y,
-						Z,
-						THETA1,
-						THETA2,
-						THETA3,
-						R1,
-						R2,
-						Lx,
-						Ly,
-						Lz,
-						number_of_cells_x,
-						number_of_cells_y,
-						number_of_cells_z,
-						cell_overlap)
 
-	# Simulate diffusion.
-	if !silent_mode
-		println("Starting simulation...")
-	end
 	current_particle::Int64 = 0
+	is_initial_position_ok::Bool = true
+
 	is_ok::Bool = true
 
 	x::Float64 = 0.0
@@ -98,18 +47,10 @@ include("cell_lists.jl")
 	vx_star::Float64 = 0.0
 	vy_star::Float64 = 0.0
 	vz_star::Float64 = 0.0
-	w1::Float64 = 0.0
-	w1_star::Float64 = 0.0
-	w2::Float64 = 0.0
-	w2_star::Float64 = 0.0
-	w3::Float64 = 0.0
-	w3_star::Float64 = 0.0
-	w1_intersection::Float64 = 0.0
-	w2_intersection::Float64 = 0.0
-	alpha::Float64 = 0.0
 	trajectory_x::Array{Float64} = zeros(number_of_time_points_coarse)
 	trajectory_y::Array{Float64} = zeros(number_of_time_points_coarse)
 	trajectory_z::Array{Float64} = zeros(number_of_time_points_coarse)
+	msd::Array{Float64} = zeros(number_of_time_points_coarse)
 	msd_x::Array{Float64} = zeros(number_of_time_points_coarse)
 	msd_y::Array{Float64} = zeros(number_of_time_points_coarse)
 	msd_z::Array{Float64} = zeros(number_of_time_points_coarse)
@@ -117,19 +58,25 @@ include("cell_lists.jl")
 
 	t_start_diffusion::Float64 = convert(Float64, time_ns()) / 1e9
 	t_elapsed_diffusion::Float64 = 0.0
-	#fraction_done::Float64 = 0.0
-	#percent_done::Float64 = 0.0
-	#t_remaining_diffusion::Float64 = 0.0
+
 	chunk::Int64 = 0
-	println("   Elapsed time (hh:mm:ss)   Done (%)   Est. time remaining (hh:mm:ss)")
 	for current_diffuser = 1:number_of_diffusers
-		#println(current_diffuser)
+		println(current_diffuser)
+
+		if particle_type == "sphere"
+			is_initial_position_ok = false
+			while !is_initial_position_ok
+				x = Lx * rand()
+				y = Ly * rand()
+				z = Lz * rand()
+
+				current_particle = 0
+				while !is_initial_position_ok && current_particle < number_of_particles
+					
 
 		# By definition, a random position end up in void almost surely (w.p. 1),
 		# so as initial position we just pick one randomly.
-		x = Lx * rand()
-		y = Ly * rand()
-		z = Lz * rand()
+
 
 		x_abs = x
 		y_abs = y
@@ -279,14 +226,15 @@ include("cell_lists.jl")
 	end
 	print_progress(t_elapsed_diffusion, number_of_diffusers, number_of_diffusers)
 
-	msd_x = msd_x ./ convert(Float64, number_of_diffusers)
-	msd_y = msd_y ./ convert(Float64, number_of_diffusers)
-	msd_z = msd_z ./ convert(Float64, number_of_diffusers)
+	#msd_x = msd_x ./ convert(Float64, number_of_diffusers)
+	#msd_y = msd_y ./ convert(Float64, number_of_diffusers)
+	#msd_z = msd_z ./ convert(Float64, number_of_diffusers)
 	#msd_x = msd_x ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
 	#msd_y = msd_y ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
 	#msd_z = msd_z ./ (convert(Float64, number_of_diffusers) .* (convert(Float64, number_of_time_points_coarse):-1.0:1.0))
 
-	D0_empirical = D0_empirical / (3.0 * convert(Float64, number_of_diffusers * (number_of_time_points_coarse-1) * number_of_time_points_fine_per_coarse) * 2.0 * deltat_fine)
-
-	return (msd_x, msd_y, msd_z, D0_empirical)
+	#D0_empirical = D0_empirical / (3.0 * convert(Float64, number_of_diffusers * (number_of_time_points_coarse-1) * number_of_time_points_fine_per_coarse) * 2.0 * deltat_fine)
+	#println(sum(msd_z))
+	output::Array{Float64, 1} = vcat(msd_x, msd_y, msd_z, D0_empirical)
+	return output
 end
