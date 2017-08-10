@@ -1,13 +1,10 @@
 
-include("file_io/read_xml_key.jl")
-include("file_io/write_xml_key.jl")
+include("file_io/read_key.jl")
+include("file_io/write_key.jl")
 
-include("file_io/read_xml_input.jl")
-include("file_io/read_xml_output_generation.jl")
-include("file_io/write_xml_output.jl")
-
-include("text_io/print_header.jl")
-include("text_io/print_simulation_stats.jl")
+include("file_io/read_input.jl")
+include("file_io/read_output_generation.jl")
+include("file_io/write_output.jl")
 
 foo = @__FILE__
 @eval @everywhere f = $foo
@@ -60,13 +57,13 @@ function wfrun_diffusion_parallel()
 	if !silent_mode
 		println(join(("Reading input from file ", input_file_path, "...")))
 	end
-	(output_generation_path::String, D0::Float64, deltat_coarse::Float64, number_of_time_points_coarse::Int64, number_of_time_points_fine_per_coarse::Int64, number_of_diffusers::Int64, number_of_cells_x::Int64, number_of_cells_y::Int64, number_of_cells_z::Int64, output_file_path::String) = read_xml_input(input_file_path)
+	(output_generation_path::String, D0::Float64, deltat_coarse::Float64, number_of_time_points_coarse::Int64, number_of_time_points_fine_per_coarse::Int64, number_of_diffusers::Int64, number_of_cells_x::Int64, number_of_cells_y::Int64, number_of_cells_z::Int64, output_file_path::String) = read_input(input_file_path)
 
 	# Process particle system file.
 	if !silent_mode
 		println(join(("Reading particle system configuration from file ", output_generation_path, "...")))
 	end
-	(Lx::Float64, Ly::Float64, Lz::Float64, particle_type::String, number_of_particles::Int64, X::Array{Float64, 1}, Y::Array{Float64, 1}, Z::Array{Float64, 1}, THETA1::Array{Float64, 1}, THETA2::Array{Float64, 1}, THETA3::Array{Float64, 1}, R1::Array{Float64, 1}, R2::Array{Float64, 1}) = read_xml_output_generation(output_generation_path)
+	(Lx::Float64, Ly::Float64, Lz::Float64, particle_type::String, number_of_particles::Int64, X::Array{Float64, 1}, Y::Array{Float64, 1}, Z::Array{Float64, 1}, THETA1::Array{Float64, 1}, THETA2::Array{Float64, 1}, THETA3::Array{Float64, 1}, R1::Array{Float64, 1}, R2::Array{Float64, 1}) = read_output_generation(output_generation_path)
 
 	# Print simulation stats.
 	if !silent_mode
@@ -150,9 +147,9 @@ function wfrun_diffusion_parallel()
 
 	# Write output.
 
-	#write_xml_output(output_file_path, D0, convert(Float64, D0_empirical[1]), deltat_coarse, number_of_time_points_coarse, convert(Array{Float64, 1}, msd_x), convert(Array{Float64, 1}, msd_y), convert(Array{Float64, 1}, msd_z), t_exec)
-	#write_xml_output(output_file_path, D0, sdata(D0_empirical)[1], deltat_coarse, number_of_time_points_coarse, sdata(msd_x), sdata(msd_y), sdata(msd_z), t_exec)
-	write_xml_output(output_file_path, D0, D0_empirical, deltat_coarse, number_of_time_points_coarse, msd_x, msd_y, msd_z, t_exec)
+	#write_output(output_file_path, D0, convert(Float64, D0_empirical[1]), deltat_coarse, number_of_time_points_coarse, convert(Array{Float64, 1}, msd_x), convert(Array{Float64, 1}, msd_y), convert(Array{Float64, 1}, msd_z), t_exec)
+	#write_output(output_file_path, D0, sdata(D0_empirical)[1], deltat_coarse, number_of_time_points_coarse, sdata(msd_x), sdata(msd_y), sdata(msd_z), t_exec)
+	write_output(output_file_path, D0, D0_empirical, deltat_coarse, number_of_time_points_coarse, msd_x, msd_y, msd_z, t_exec)
 
 	# Print output information.
 	if !silent_mode
