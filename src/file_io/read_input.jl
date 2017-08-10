@@ -12,6 +12,7 @@ function read_input(file_path::String)
 	number_of_cells_x::Int64 = read_key(file_string, "number_of_cells_x", Int64)
 	number_of_cells_y::Int64 = read_key(file_string, "number_of_cells_y", Int64)
 	number_of_cells_z::Int64 = read_key(file_string, "number_of_cells_z", Int64)
+	boundary_condition::String = read_key(file_string, "boundary_condition", String)
 	output_file_path::String = read_key(file_string, "output_file_path", String)
 
 	return (
@@ -24,5 +25,6 @@ function read_input(file_path::String)
 		number_of_cells_x,
 		number_of_cells_y,
 		number_of_cells_z,
+		boundary_condition,
 		output_file_path)
 end

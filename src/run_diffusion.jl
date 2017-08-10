@@ -48,6 +48,7 @@ function run_diffusion()
 		number_of_cells_x::Int64,
 		number_of_cells_y::Int64,
 		number_of_cells_z::Int64,
+		boundary_condition::String,
 		output_file_path::String) = read_input(input_file_path)
 
 	# Read generation output from file.
@@ -93,7 +94,8 @@ function run_diffusion()
 			deltat_coarse,
 			number_of_time_points_coarse,
 			number_of_time_points_fine_per_coarse,
-			number_of_diffusers_per_worker[current_worker])
+			number_of_diffusers_per_worker[current_worker],
+			boundary_condition)
 	end
 	msd::Array{Float64, 1} = output[1:number_of_time_points_coarse] ./ convert(Float64, 3 * number_of_diffusers)
 	msd_x::Array{Float64, 1} = output[number_of_time_points_coarse+1:2*number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)

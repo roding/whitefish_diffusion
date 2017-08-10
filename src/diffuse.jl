@@ -14,7 +14,8 @@ function diffuse(particle_type::String,
 	deltat_coarse::Float64,
 	number_of_time_points_coarse::Int64,
 	number_of_time_points_fine_per_coarse::Int64,
-	number_of_diffusers::Int64)
+	number_of_diffusers::Int64,
+	boundary_condition::String)
 
 	# Number of particles.
 	number_of_particles::Int64 = length(X)
@@ -96,49 +97,49 @@ function diffuse(particle_type::String,
 		# Starting diffusion.
 		for current_time_coarse = 2:number_of_time_points_coarse
 			for current_time_fine = 1:number_of_time_points_fine_per_coarse
-				# Random proposal displacement.
-				deltax = sigma * randn()
-				deltay = sigma * randn()
-				deltaz = sigma * randn()
+				if boundary_condition == "single-rejection"
+					deltax = sigma * randn()
+					deltay = sigma * randn()
+					deltaz = sigma * randn()
 
-				# Calculate proposed new position.
-				x_star = x + deltax
-				y_star = y + deltay
-				z_star = z + deltaz
+					x_star = x + deltax
+					y_star = y + deltay
+					z_star = z + deltaz
 
-				if x_star < 0.0
-					x_star += Lx
-				elseif x_star > Lx
-					x_star -= Lx
-				end
-				if y_star < 0.0
-					y_star += Ly
-				elseif y_star > Ly
-					y_star -= Ly
-				end
-				if z_star < 0.0
-					z_star += Lz
-				elseif z_star > Lz
-					z_star -= Lz
-				end
+					if x_star < 0.0
+						x_star += Lx
+					elseif x_star > Lx
+						x_star -= Lx
+					end
+					if y_star < 0.0
+						y_star += Ly
+					elseif y_star > Ly
+						y_star -= Ly
+					end
+					if z_star < 0.0
+						z_star += Lz
+					elseif z_star > Lz
+						z_star -= Lz
+					end
 
-				# Check for diffuser-particle intersections.
-				current_particle = 0
-				is_proposed_position_ok = true
-				while current_particle < number_of_particles && is_proposed_position_ok
-					current_particle += 1
+					# Check for diffuser-particle intersections.
+					current_particle = 0
+					is_proposed_position_ok = true
+					while current_particle < number_of_particles && is_proposed_position_ok
+						current_particle += 1
 
-					if particle_type == "sphere"
-						# Coordinates of candidate diffuser position relative to particle.
-						vx_star = signed_distance_mod(x_star, X[current_particle], Lx)
-						vy_star = signed_distance_mod(y_star, Y[current_particle], Ly)
-						vz_star = signed_distance_mod(z_star, Z[current_particle], Lz)
+						if particle_type == "sphere"
+							vx_star = signed_distance_mod(x_star, X[current_particle], Lx)
+							vy_star = signed_distance_mod(y_star, Y[current_particle], Ly)
+							vz_star = signed_distance_mod(z_star, Z[current_particle], Lz)
 
-						if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_particle, 1]^2
-							is_proposed_position_ok = false
+							if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_particle, 1]^2
+								is_proposed_position_ok = false
+							end
 						end
 					end
 
+					# Make displacement if proposed position ok.
 					if is_proposed_position_ok
 						x = x_star
 						y = y_star
@@ -150,6 +151,60 @@ function diffuse(particle_type::String,
 
 						D0_empirical = D0_empirical + deltax^2 + deltay^2 + deltaz^2
 					end
+				elseif boundary_condition == "multiple-rejection"
+					is_proposed_position_ok = false
+					while !is_proposed_position_ok
+						deltax = sigma * randn()
+						deltay = sigma * randn()
+						deltaz = sigma * randn()
+
+						x_star = x + deltax
+						y_star = y + deltay
+						z_star = z + deltaz
+
+						if x_star < 0.0
+							x_star += Lx
+						elseif x_star > Lx
+							x_star -= Lx
+						end
+						if y_star < 0.0
+							y_star += Ly
+						elseif y_star > Ly
+							y_star -= Ly
+						end
+						if z_star < 0.0
+							z_star += Lz
+						elseif z_star > Lz
+							z_star -= Lz
+						end
+
+						# Check for diffuser-particle intersections.
+						current_particle = 0
+						is_proposed_position_ok = true
+						while current_particle < number_of_particles && is_proposed_position_ok
+							current_particle += 1
+
+							if particle_type == "sphere"
+								vx_star = signed_distance_mod(x_star, X[current_particle], Lx)
+								vy_star = signed_distance_mod(y_star, Y[current_particle], Ly)
+								vz_star = signed_distance_mod(z_star, Z[current_particle], Lz)
+
+								if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_particle, 1]^2
+									is_proposed_position_ok = false
+								end
+							end
+						end
+					end
+
+					x = x_star
+					y = y_star
+					z = z_star
+
+					x_abs = x_abs + deltax
+					y_abs = y_abs + deltay
+					z_abs = z_abs + deltaz
+
+					D0_empirical = D0_empirical + deltax^2 + deltay^2 + deltaz^2
 				end
 			end
 
