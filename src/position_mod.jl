@@ -1,10 +1,9 @@
-function signed_distance_mod(x1::Float64, x2::Float64, L::Float64)
-	x12::Float64 = x2 - x1
-	if x12 < -0.5 * L
-		x12 += L
-	elseif x12 > 0.5 * L
-		x12 -= L
+function position_mod(x::Float64, L::Float64)
+	if x < 0.0
+		x += L
+	elseif x > L
+		x -= L
 	end
-	
-	return x12
+
+	return x
 end

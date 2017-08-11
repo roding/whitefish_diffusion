@@ -15,7 +15,8 @@ function diffuse(particle_type::String,
 	number_of_time_points_coarse::Int64,
 	number_of_time_points_fine_per_coarse::Int64,
 	number_of_diffusers::Int64,
-	boundary_condition::String)
+	boundary_condition::String,
+	cell_lists::Array{Array{Int64, 1}, 3})
 
 	# Number of particles.
 	number_of_particles::Int64 = length(X)
@@ -23,6 +24,9 @@ function diffuse(particle_type::String,
 	# Standard deviation of Gaussian jumps.
 	deltat_fine::Float64 = deltat_coarse / convert(Float64, number_of_time_points_fine_per_coarse)
 	sigma::Float64 = sqrt(2 * D0 * deltat_fine)
+
+	# Number of cells.
+	(number_of_cells_x::Int64, number_of_cells_y::Int64, number_of_cells_z::Int64) = size(cell_lists)
 
 	current_particle::Int64 = 0
 	is_initial_position_ok::Bool = true
@@ -46,6 +50,10 @@ function diffuse(particle_type::String,
 	vx_star::Float64 = 0.0
 	vy_star::Float64 = 0.0
 	vz_star::Float64 = 0.0
+	current_cell_x::Int64 = 0
+	current_cell_y::Int64 = 0
+	current_cell_z::Int64 = 0
+	number_of_particles_current_cell::Int64 = 0
 	trajectory_x::Array{Float64} = zeros(number_of_time_points_coarse)
 	trajectory_y::Array{Float64} = zeros(number_of_time_points_coarse)
 	trajectory_z::Array{Float64} = zeros(number_of_time_points_coarse)
@@ -97,43 +105,33 @@ function diffuse(particle_type::String,
 		# Starting diffusion.
 		for current_time_coarse = 2:number_of_time_points_coarse
 			for current_time_fine = 1:number_of_time_points_fine_per_coarse
+				current_cell_x = convert(Int64, ceil(x / Lx * convert(Float64, number_of_cells_x)))
+				current_cell_y = convert(Int64, ceil(y / Ly * convert(Float64, number_of_cells_y)))
+				current_cell_z = convert(Int64, ceil(z / Lz * convert(Float64, number_of_cells_z)))
+				number_of_particles_current_cell = length(cell_lists[current_cell_x, current_cell_y, current_cell_z])
+				current_cell_list = cell_lists[current_cell_x, current_cell_y, current_cell_z]
+
 				if boundary_condition == "single-rejection"
 					deltax = sigma * randn()
 					deltay = sigma * randn()
 					deltaz = sigma * randn()
 
-					x_star = x + deltax
-					y_star = y + deltay
-					z_star = z + deltaz
-
-					if x_star < 0.0
-						x_star += Lx
-					elseif x_star > Lx
-						x_star -= Lx
-					end
-					if y_star < 0.0
-						y_star += Ly
-					elseif y_star > Ly
-						y_star -= Ly
-					end
-					if z_star < 0.0
-						z_star += Lz
-					elseif z_star > Lz
-						z_star -= Lz
-					end
+					x_star = position_mod(x + deltax, Lx)
+					y_star = position_mod(y + deltay, Ly)
+					z_star = position_mod(z + deltaz, Lz)
 
 					# Check for diffuser-particle intersections.
 					current_particle = 0
 					is_proposed_position_ok = true
-					while current_particle < number_of_particles && is_proposed_position_ok
+					while current_particle < number_of_particles_current_cell && is_proposed_position_ok
 						current_particle += 1
 
 						if particle_type == "sphere"
-							vx_star = signed_distance_mod(x_star, X[current_particle], Lx)
-							vy_star = signed_distance_mod(y_star, Y[current_particle], Ly)
-							vz_star = signed_distance_mod(z_star, Z[current_particle], Lz)
+							vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle]], Lx)
+							vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle]], Ly)
+							vz_star = signed_distance_mod(z_star, Z[current_cell_list[current_particle]], Lz)
 
-							if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_particle, 1]^2
+							if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_cell_list[current_particle], 1]^2
 								is_proposed_position_ok = false
 							end
 						end
@@ -158,38 +156,22 @@ function diffuse(particle_type::String,
 						deltay = sigma * randn()
 						deltaz = sigma * randn()
 
-						x_star = x + deltax
-						y_star = y + deltay
-						z_star = z + deltaz
-
-						if x_star < 0.0
-							x_star += Lx
-						elseif x_star > Lx
-							x_star -= Lx
-						end
-						if y_star < 0.0
-							y_star += Ly
-						elseif y_star > Ly
-							y_star -= Ly
-						end
-						if z_star < 0.0
-							z_star += Lz
-						elseif z_star > Lz
-							z_star -= Lz
-						end
+						x_star = position_mod(x + deltax, Lx)
+						y_star = position_mod(y + deltay, Ly)
+						z_star = position_mod(z + deltaz, Lz)
 
 						# Check for diffuser-particle intersections.
 						current_particle = 0
 						is_proposed_position_ok = true
-						while current_particle < number_of_particles && is_proposed_position_ok
+						while current_particle < number_of_particles_current_cell && is_proposed_position_ok
 							current_particle += 1
 
 							if particle_type == "sphere"
-								vx_star = signed_distance_mod(x_star, X[current_particle], Lx)
-								vy_star = signed_distance_mod(y_star, Y[current_particle], Ly)
-								vz_star = signed_distance_mod(z_star, Z[current_particle], Lz)
+								vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle]], Lx)
+								vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle]], Ly)
+								vz_star = signed_distance_mod(z_star, Z[current_cell_list[current_particle]], Lz)
 
-								if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_particle, 1]^2
+								if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_cell_list[current_particle], 1]^2
 									is_proposed_position_ok = false
 								end
 							end
