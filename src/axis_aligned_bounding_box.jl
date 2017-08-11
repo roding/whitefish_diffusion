@@ -14,6 +14,16 @@ function axis_aligned_bounding_box(	particle_type::String,
 	lbz::Float64 = 0.0
 	ubz::Float64 = 0.0
 
+	a11::Float64 = 0.0
+	a12::Float64 = 0.0
+	a13::Float64 = 0.0
+	a21::Float64 = 0.0
+	a22::Float64 = 0.0
+	a23::Float64 = 0.0
+	a31::Float64 = 0.0
+	a32::Float64 = 0.0
+	a33::Float64 = 0.0
+
 	if particle_type == "sphere"
 		lbx = x - R[1]
 		ubx = x + R[1]
@@ -23,10 +33,10 @@ function axis_aligned_bounding_box(	particle_type::String,
 		ubz = z + R[1]
 	elseif particle_type == "ellipse"
 		# Rotation matrix.
-		(a11::Float64, a12::Float64, a13::Float64, a21::Float64, a22::Float64, a23::Float64, a31::Float64, a32::Float64, a33::Float64) = rotation_matrix(q0, q1, q2, q3)
+		(a11, a12, a13, a21, a22, a23, a31, a32, a33) = rotation_matrix(q0, q1, q2, q3)
 
 		# Unrotated corner coordinates of the ellipse (effectively 2-D) AABB. We don't subtract the 1 from the z coordinates because we only use four corners now.
-		C::Array{Float64, 2} = 2.0 * [[0.0, 0.0, 0.0] [0.0, 1.0, 0.0] [1.0, 0.0, 0.0] [1.0, 1.0, 0.0]]
+		C = 2.0 * [[0.0, 0.0, 0.0] [0.0, 1.0, 0.0] [1.0, 0.0, 0.0] [1.0, 1.0, 0.0]]
 		C[1, :] += - 1.0
 		C[2, :] += - 1.0
 
@@ -49,10 +59,10 @@ function axis_aligned_bounding_box(	particle_type::String,
 		ubz = z + maximum(C[3, :])
 	elseif particle_type == "ellipsoid"
 		# Rotation matrix.
-		(a11::Float64, a12::Float64, a13::Float64, a21::Float64, a22::Float64, a23::Float64, a31::Float64, a32::Float64, a33::Float64) = rotation_matrix(q0, q1, q2, q3)
+		(a11, a12, a13, a21, a22, a23, a31, a32, a33) = rotation_matrix(q0, q1, q2, q3)
 
 		# Unrotated corner coordinates of the ellipsoids AABB.
-		C::Array{Float64, 2} = 2.0 * [[0.0, 0.0, 0.0] [0.0, 0.0, 1.0] [0.0, 1.0, 0.0] [0.0, 1.0, 1.0] [1.0, 0.0, 0.0] [1.0, 0.0, 1.0] [1.0, 1.0, 0.0] [1.0, 1.0, 1.0]] - 1.0
+		C = 2.0 * [[0.0, 0.0, 0.0] [0.0, 0.0, 1.0] [0.0, 1.0, 0.0] [0.0, 1.0, 1.0] [1.0, 0.0, 0.0] [1.0, 0.0, 1.0] [1.0, 1.0, 0.0] [1.0, 1.0, 1.0]] - 1.0
 
 		# Unrotated but correctly scaled corner coordinates of the ellipsoids AABB.
 		for i = 1:3
@@ -73,10 +83,10 @@ function axis_aligned_bounding_box(	particle_type::String,
 		ubz = z + maximum(C[3, :])
 	elseif particle_type == "cuboid"
 		# Rotation matrix.
-		(a11::Float64, a12::Float64, a13::Float64, a21::Float64, a22::Float64, a23::Float64, a31::Float64, a32::Float64, a33::Float64) = rotation_matrix(q0, q1, q2, q3)
+		(a11, a12, a13, a21, a22, a23, a31, a32, a33) = rotation_matrix(q0, q1, q2, q3)
 
 		# Unrotated corner coordinates.
-		C::Array{Float64, 2} = 2.0 * [[0.0, 0.0, 0.0] [0.0, 0.0, 1.0] [0.0, 1.0, 0.0] [0.0, 1.0, 1.0] [1.0, 0.0, 0.0] [1.0, 0.0, 1.0] [1.0, 1.0, 0.0] [1.0, 1.0, 1.0]] - 1.0
+		C = 2.0 * [[0.0, 0.0, 0.0] [0.0, 0.0, 1.0] [0.0, 1.0, 0.0] [0.0, 1.0, 1.0] [1.0, 0.0, 0.0] [1.0, 0.0, 1.0] [1.0, 1.0, 0.0] [1.0, 1.0, 1.0]] - 1.0
 
 		# Unrotated but correctly scaled corner coordinates.
 		for i = 1:3

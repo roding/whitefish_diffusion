@@ -59,16 +59,7 @@ function generate_cell_lists(	particle_type::String,
 																		Q0[current_particle],
 																		Q1[current_particle],
 																		Q2[current_particle],
-																		Q3[current_particle],
-																		A11[current_particle],
-																		A12[current_particle],
-																		A13[current_particle],
-																		A21[current_particle],
-																		A22[current_particle],
-																		A23[current_particle],
-																		A31[current_particle],
-																		A32[current_particle],
-																		A33[current_particle])
+																		Q3[current_particle])
 	end
 
 	# Create cell dimension data structures.

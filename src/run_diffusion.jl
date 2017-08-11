@@ -7,6 +7,10 @@ include("file_io/read_input.jl")
 include("file_io/read_output_generation.jl")
 include("file_io/write_output.jl")
 
+include("characteristic_matrix_ellipse.jl")
+include("characteristic_matrix_ellipsoid.jl")
+include("rotation_matrix.jl")
+
 foo = @__FILE__
 @eval @everywhere f = $foo
 @everywhere println(f)
@@ -71,6 +75,7 @@ function run_diffusion()
 		Q2::Array{Float64, 1},
 		Q3::Array{Float64, 1},
 		execution_time_diffusion::Float64) = read_output_generation(output_generation_path)
+	number_of_particles::Int64 = length(X)
 
 	# Characteristic/rotation matrix entries.
 	A11::Array{Float64, 1} = zeros(number_of_particles)
@@ -149,27 +154,18 @@ function run_diffusion()
 																Q1,
 																Q2,
 																Q3,
-																A11,
-																A12,
-																A13,
-																A21,
-																A22,
-																A23,
-																A21,
-																A22,
-																A23,
 																number_of_cells_x,
 																number_of_cells_y,
 																number_of_cells_z,
 																cell_overlap)
-#	mean_number_of_particles_per_cell::Float64 = 0.0
-#	for i = 1:length(cell_lists)
-#		mean_number_of_particles_per_cell += length(cell_lists[i])
-#	end
-#	mean_number_of_particles_per_cell /= length(cell_lists)
-#	#	println(cell_lists)
-#	println(mean_number_of_particles_per_cell)
-#return
+	mean_number_of_particles_per_cell::Float64 = 0.0
+	for i = 1:length(cell_lists)
+		mean_number_of_particles_per_cell += length(cell_lists[i])
+	end
+	mean_number_of_particles_per_cell /= length(cell_lists)
+	#	println(cell_lists)
+	println(mean_number_of_particles_per_cell)
+	return
 
 	# Simulate diffusion.
 	number_of_workers::Int64 = nworkers() # This is determined by the the '-p' input flag to Julia.

@@ -59,6 +59,7 @@ function diffuse(particle_type::String,
 	vx_star::Float64 = 0.0
 	vy_star::Float64 = 0.0
 	vz_star::Float64 = 0.0
+	V::Array{Float64, 1} = zeros(3)
 	current_cell_x::Int64 = 0
 	current_cell_y::Int64 = 0
 	current_cell_z::Int64 = 0
@@ -94,9 +95,38 @@ function diffuse(particle_type::String,
 				while current_particle < number_of_particles && is_initial_position_ok
 					current_particle += 1
 					vx = signed_distance_mod(x, X[current_particle], Lx)
-					vy = signed_distance_mod(y, Y[current_particle], Lx)
-					vz = signed_distance_mod(z, Z[current_particle], Lx)
+					vy = signed_distance_mod(y, Y[current_particle], Ly)
+					vz = signed_distance_mod(z, Z[current_particle], Lz)
 					if vx^2 + vy^2 + vz^2 <= R[current_particle, 1]^2
+						is_initial_position_ok = false
+					end
+				end
+			end
+		elseif particle_type == "ellipse" # By definition any point in the simulation domain is outside of the ellipses w.p. 1.
+			x = Lx * rand()
+			y = Ly * rand()
+			z = Lz * rand()
+		elseif particle_type == "ellipsoid"
+
+		elseif particle_type == "cuboid"
+			is_initial_position_ok = false
+			while !is_initial_position_ok
+				x = Lx * rand()
+				y = Ly * rand()
+				z = Lz * rand()
+
+				is_initial_position_ok = true
+				current_particle = 0
+				while current_particle < number_of_particles && is_initial_position_ok
+					current_particle += 1
+					vx = signed_distance_mod(x, X[current_particle], Lx)
+					vy = signed_distance_mod(y, Y[current_particle], Ly)
+					vz = signed_distance_mod(z, Z[current_particle], Lz)
+					V = [A11[current_particle] A12[current_particle] A13[current_particle] ; A21[current_particle] A22[current_particle] A23[current_particle] ;A31[current_particle] A32[current_particle] A33[current_particle]] \ [vx, vy, vz]
+					vx = V[1]
+					vy = V[2]
+					vz = V[3]
+					if abs(vx) <= R[current_particle, 1] && abs(vy) <= R[current_particle, 2] && abs(vz) <= R[current_particle, 3]
 						is_initial_position_ok = false
 					end
 				end
