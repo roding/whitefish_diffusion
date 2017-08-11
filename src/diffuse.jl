@@ -78,7 +78,7 @@ function diffuse(particle_type::String,
 
 	chunk::Int64 = 0
 	for current_diffuser = 1:number_of_diffusers
-		if mod(current_diffuser, 100) == 0
+		if mod(current_diffuser, 10) == 0
 			println(current_diffuser)
 		end
 
@@ -173,6 +173,21 @@ function diffuse(particle_type::String,
 							if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_cell_list[current_particle], 1]^2
 								is_proposed_position_ok = false
 							end
+						elseif particle_type == "ellipse"
+
+						elseif particle_type == "ellipsoid"
+
+						elseif particle_type == "cuboid"
+							vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle]], Lx)
+							vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle]], Ly)
+							vz_star = signed_distance_mod(z_star, Z[current_cell_list[current_particle]], Lz)
+							V = [A11[current_particle] A12[current_particle] A13[current_particle] ; A21[current_particle] A22[current_particle] A23[current_particle] ; A31[current_particle] A32[current_particle] A33[current_particle]] \ [vx_star, vy_star, vz_star]
+							vx_star = V[1]
+							vy_star = V[2]
+							vz_star = V[3]
+							if abs(vx_star) <= R[current_particle, 1] && abs(vy_star) <= R[current_particle, 2] && abs(vz_star) <= R[current_particle, 3]
+								is_proposed_position_ok = false
+							end
 						end
 					end
 
@@ -213,6 +228,12 @@ function diffuse(particle_type::String,
 								if vx_star^2 + vy_star^2 + vz_star^2 <= R[current_cell_list[current_particle], 1]^2
 									is_proposed_position_ok = false
 								end
+							elseif particle_type == "ellipse"
+
+							elseif particle_type == "ellipsoid"
+
+							elseif particle_type == "cuboid"
+
 							end
 						end
 					end
