@@ -72,6 +72,67 @@ function run_diffusion()
 		Q3::Array{Float64, 1},
 		execution_time_diffusion::Float64) = read_output_generation(output_generation_path)
 
+	# Characteristic/rotation matrix entries.
+	A11::Array{Float64, 1} = zeros(number_of_particles)
+	A12::Array{Float64, 1} = zeros(number_of_particles)
+	A13::Array{Float64, 1} = zeros(number_of_particles)
+	A21::Array{Float64, 1} = zeros(number_of_particles)
+	A22::Array{Float64, 1} = zeros(number_of_particles)
+	A23::Array{Float64, 1} = zeros(number_of_particles)
+	A31::Array{Float64, 1} = zeros(number_of_particles)
+	A32::Array{Float64, 1} = zeros(number_of_particles)
+	A33::Array{Float64, 1} = zeros(number_of_particles)
+
+	a11::Float64 = 0.0
+	a12::Float64 = 0.0
+	a13::Float64 = 0.0
+	a21::Float64 = 0.0
+	a22::Float64 = 0.0
+	a23::Float64 = 0.0
+	a31::Float64 = 0.0
+	a32::Float64 = 0.0
+	a33::Float64 = 0.0
+	if particle_type == "ellipse"
+		for current_particle = 1:number_of_particles
+			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = characteristic_matrix_ellipse(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle], R[current_particle, 1], R[current_particle, 2])
+			A11[current_particle] = a11
+			A12[current_particle] = a12
+			A13[current_particle] = a13
+			A21[current_particle] = a21
+			A22[current_particle] = a22
+			A23[current_particle] = a23
+			A31[current_particle] = a31
+			A32[current_particle] = a32
+			A33[current_particle] = a33
+		end
+	elseif particle_type == "ellipsoid"
+		for current_particle = 1:number_of_particles
+			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = characteristic_matrix_ellipsoid(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle], R[current_particle, 1], R[current_particle, 2], R[current_particle, 3])
+			A11[current_particle] = a11
+			A12[current_particle] = a12
+			A13[current_particle] = a13
+			A21[current_particle] = a21
+			A22[current_particle] = a22
+			A23[current_particle] = a23
+			A31[current_particle] = a31
+			A32[current_particle] = a32
+			A33[current_particle] = a33
+		end
+	elseif particle_type == "cuboid"
+		for current_particle = 1:number_of_particles
+			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = rotation_matrix(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle])
+			A11[current_particle] = a11
+			A12[current_particle] = a12
+			A13[current_particle] = a13
+			A21[current_particle] = a21
+			A22[current_particle] = a22
+			A23[current_particle] = a23
+			A31[current_particle] = a31
+			A32[current_particle] = a32
+			A33[current_particle] = a33
+		end
+	end
+
 	# Create cell lists.
 	deltat_fine::Float64 = deltat_coarse / convert(Float64, number_of_time_points_fine_per_coarse)
 	sigma::Float64 = sqrt(2.0 * D0 * deltat_fine)
