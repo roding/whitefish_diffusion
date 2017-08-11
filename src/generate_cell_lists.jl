@@ -18,24 +18,24 @@ function generate_cell_lists(	particle_type::String,
 	number_of_particles::Int64 = length(X)
 
 	# Pre-computed max radii (i.e. radius of bounding sphere).
-	RMAX::Array{Float64, 1} = zeros(number_of_particles)
-	if particle_type == "sphere"
-		for current_particle = 1:number_of_particles
-			RMAX[current_particle] = R[current_particle, 1]
-		end
-	elseif particle_type == "ellipse"
-		for current_particle = 1:number_of_particles
-			RMAX[current_particle] = maximum( R[current_particle, 1:2] )
-		end
-	elseif particle_type == "ellipsoid"
-		for current_particle = 1:number_of_particles
-			RMAX[current_particle] = maximum( R[current_particle, 1:3] )
-		end
-	elseif particle_type == "cuboid"
-		for current_particle = 1:number_of_particles
-			RMAX[current_particle] = sqrt(R[current_particle, 1]^2 + R[current_particle, 2]^2 + R[current_particle, 3]^2)
-		end
-	end
+#	RMAX::Array{Float64, 1} = zeros(number_of_particles)
+#	if particle_type == "sphere"
+#		for current_particle = 1:number_of_particles
+#			RMAX[current_particle] = R[current_particle, 1]
+#		end
+#	elseif particle_type == "ellipse"
+#		for current_particle = 1:number_of_particles
+#			RMAX[current_particle] = maximum( R[current_particle, 1:2] )
+#		end
+#	elseif particle_type == "ellipsoid"
+#		for current_particle = 1:number_of_particles
+#			RMAX[current_particle] = maximum( R[current_particle, 1:3] )
+#		end
+#	elseif particle_type == "cuboid"
+#		for current_particle = 1:number_of_particles
+#			RMAX[current_particle] = sqrt(R[current_particle, 1]^2 + R[current_particle, 2]^2 + R[current_particle, 3]^2)
+#		end
+#	end
 
 	# Compute bounding box for all particles.
 	lbx_particle::Array{Float64, 1} = zeros(number_of_particles)
@@ -59,7 +59,16 @@ function generate_cell_lists(	particle_type::String,
 																		Q0[current_particle],
 																		Q1[current_particle],
 																		Q2[current_particle],
-																		Q3[current_particle])
+																		Q3[current_particle],
+																		A11[current_particle],
+																		A12[current_particle],
+																		A13[current_particle],
+																		A21[current_particle],
+																		A22[current_particle],
+																		A23[current_particle],
+																		A31[current_particle],
+																		A32[current_particle],
+																		A33[current_particle])
 	end
 
 	# Create cell dimension data structures.
