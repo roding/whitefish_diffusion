@@ -23,7 +23,7 @@ function diffuse(particle_type::String,
 
 	# Standard deviation of Gaussian jumps.
 	deltat_fine::Float64 = deltat_coarse / convert(Float64, number_of_time_points_fine_per_coarse)
-	sigma::Float64 = sqrt(2 * D0 * deltat_fine)
+	sigma::Float64 = sqrt(2.0 * D0 * deltat_fine)
 
 	# Number of cells.
 	(number_of_cells_x::Int64, number_of_cells_y::Int64, number_of_cells_z::Int64) = size(cell_lists)

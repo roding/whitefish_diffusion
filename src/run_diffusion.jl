@@ -74,7 +74,7 @@ function run_diffusion()
 
 	# Create cell lists.
 	deltat_fine::Float64 = deltat_coarse / convert(Float64, number_of_time_points_fine_per_coarse)
-	sigma::Float64 = sqrt(2 * D0 * deltat_fine)
+	sigma::Float64 = sqrt(2.0 * D0 * deltat_fine)
 	cell_overlap::Float64 = 6.0 * sigma
 	cell_lists::Array{Array{Int64, 1}, 3} = generate_cell_lists(particle_type,
 																R,
