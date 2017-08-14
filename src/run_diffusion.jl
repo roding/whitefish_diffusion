@@ -10,6 +10,7 @@ include("file_io/write_output.jl")
 include("characteristic_matrix_ellipse.jl")
 include("characteristic_matrix_ellipsoid.jl")
 include("rotation_matrix.jl")
+include("inverse_rotation_matrix.jl")
 
 foo = @__FILE__
 @eval @everywhere f = $foo
@@ -125,7 +126,7 @@ function run_diffusion()
 		end
 	elseif particle_type == "cuboid"
 		for current_particle = 1:number_of_particles
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = rotation_matrix(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle])
+			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle])
 			A11[current_particle] = a11
 			A12[current_particle] = a12
 			A13[current_particle] = a13

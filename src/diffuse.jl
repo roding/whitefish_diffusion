@@ -102,7 +102,8 @@ function diffuse(particle_type::String,
 					end
 				end
 			end
-		elseif particle_type == "ellipse" # By definition any point in the simulation domain is outside of the ellipses w.p. 1.
+		elseif particle_type == "ellipse"
+			# By definition any point in the simulation domain is outside of the ellipses w.p. 1.
 			x = Lx * rand()
 			y = Ly * rand()
 			z = Lz * rand()
@@ -122,10 +123,10 @@ function diffuse(particle_type::String,
 					vx = signed_distance_mod(x, X[current_particle], Lx)
 					vy = signed_distance_mod(y, Y[current_particle], Ly)
 					vz = signed_distance_mod(z, Z[current_particle], Lz)
-					V = [A11[current_particle] A12[current_particle] A13[current_particle] ; A21[current_particle] A22[current_particle] A23[current_particle] ;A31[current_particle] A32[current_particle] A33[current_particle]] \ [vx, vy, vz]
-					vx = V[1]
-					vy = V[2]
-					vz = V[3]
+					(vx, vy, vz) = (A11[current_particle] * vx + A12[current_particle] * vy + A13[current_particle] * vz,
+									A21[current_particle] * vx + A22[current_particle] * vy + A23[current_particle] * vz,
+									A31[current_particle] * vx + A32[current_particle] * vy + A33[current_particle] * vz)
+
 					if abs(vx) <= R[current_particle, 1] && abs(vy) <= R[current_particle, 2] && abs(vz) <= R[current_particle, 3]
 						is_initial_position_ok = false
 					end
@@ -181,10 +182,9 @@ function diffuse(particle_type::String,
 							vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle]], Lx)
 							vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle]], Ly)
 							vz_star = signed_distance_mod(z_star, Z[current_cell_list[current_particle]], Lz)
-							V = [A11[current_particle] A12[current_particle] A13[current_particle] ; A21[current_particle] A22[current_particle] A23[current_particle] ; A31[current_particle] A32[current_particle] A33[current_particle]] \ [vx_star, vy_star, vz_star]
-							vx_star = V[1]
-							vy_star = V[2]
-							vz_star = V[3]
+							(vx_star, vy_star, vz_star) = (	A11[current_particle] * vx_star + A12[current_particle] * vy_star + A13[current_particle] * vz_star,
+															A21[current_particle] * vx_star + A22[current_particle] * vy_star + A23[current_particle] * vz_star,
+															A31[current_particle] * vx_star + A32[current_particle] * vy_star + A33[current_particle] * vz_star)
 							if abs(vx_star) <= R[current_particle, 1] && abs(vy_star) <= R[current_particle, 2] && abs(vz_star) <= R[current_particle, 3]
 								is_proposed_position_ok = false
 							end
@@ -233,6 +233,15 @@ function diffuse(particle_type::String,
 							elseif particle_type == "ellipsoid"
 
 							elseif particle_type == "cuboid"
+								vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle]], Lx)
+								vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle]], Ly)
+								vz_star = signed_distance_mod(z_star, Z[current_cell_list[current_particle]], Lz)
+								(vx_star, vy_star, vz_star) = (	A11[current_particle] * vx_star + A12[current_particle] * vy_star + A13[current_particle] * vz_star,
+																A21[current_particle] * vx_star + A22[current_particle] * vy_star + A23[current_particle] * vz_star,
+																A31[current_particle] * vx_star + A32[current_particle] * vy_star + A33[current_particle] * vz_star)
+								if abs(vx_star) <= R[current_particle, 1] && abs(vy_star) <= R[current_particle, 2] && abs(vz_star) <= R[current_particle, 3]
+									is_proposed_position_ok = false
+								end
 
 							end
 						end
