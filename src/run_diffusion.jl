@@ -9,8 +9,10 @@ include("file_io/write_output.jl")
 
 include("characteristic_matrix_ellipse.jl")
 include("characteristic_matrix_ellipsoid.jl")
+include("inverse_characteristic_matrix_ellipsoid.jl")
 include("rotation_matrix.jl")
 include("inverse_rotation_matrix.jl")
+
 
 foo = @__FILE__
 @eval @everywhere f = $foo
@@ -100,20 +102,20 @@ function run_diffusion()
 	a33::Float64 = 0.0
 	if particle_type == "ellipse"
 		for current_particle = 1:number_of_particles
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = characteristic_matrix_ellipse(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle], R[current_particle, 1], R[current_particle, 2])
-			A11[current_particle] = a11
-			A12[current_particle] = a12
-			A13[current_particle] = a13
-			A21[current_particle] = a21
-			A22[current_particle] = a22
-			A23[current_particle] = a23
-			A31[current_particle] = a31
-			A32[current_particle] = a32
-			A33[current_particle] = a33
+			#(a11, a12, a13, a21, a22, a23, a31, a32, a33) = characteristic_matrix_ellipse(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle], R[current_particle, 1], R[current_particle, 2])
+			#A11[current_particle] = a11
+			#A12[current_particle] = a12
+			#A13[current_particle] = a13
+			#A21[current_particle] = a21
+			#A22[current_particle] = a22
+			#A23[current_particle] = a23
+			#A31[current_particle] = a31
+			#A32[current_particle] = a32
+			#A33[current_particle] = a33
 		end
 	elseif particle_type == "ellipsoid"
 		for current_particle = 1:number_of_particles
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = characteristic_matrix_ellipsoid(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle], R[current_particle, 1], R[current_particle, 2], R[current_particle, 3])
+			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_characteristic_matrix_ellipsoid(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle], R[current_particle, 1], R[current_particle, 2], R[current_particle, 3])
 			A11[current_particle] = a11
 			A12[current_particle] = a12
 			A13[current_particle] = a13
