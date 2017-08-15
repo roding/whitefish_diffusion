@@ -1,31 +1,33 @@
-function diffuse(particle_type::String,
-	R::Array{Float64, 2},
-	Lx::Float64,
-	Ly::Float64,
-	Lz::Float64,
-	X::Array{Float64, 1},
-	Y::Array{Float64, 1},
-	Z::Array{Float64, 1},
-	Q0::Array{Float64, 1},
-	Q1::Array{Float64, 1},
-	Q2::Array{Float64, 1},
-	Q3::Array{Float64, 1},
-	A11::Array{Float64, 1},
-	A12::Array{Float64, 1},
-	A13::Array{Float64, 1},
-	A21::Array{Float64, 1},
-	A22::Array{Float64, 1},
-	A23::Array{Float64, 1},
-	A31::Array{Float64, 1},
-	A32::Array{Float64, 1},
-	A33::Array{Float64, 1},
-	D0::Float64,
-	deltat_coarse::Float64,
-	number_of_time_points_coarse::Int64,
-	number_of_time_points_fine_per_coarse::Int64,
-	number_of_diffusers::Int64,
-	boundary_condition::String,
-	cell_lists::Array{Array{Int64, 1}, 3})
+function diffuse(	particle_type::String,
+					R::Array{Float64, 2},
+					Lx::Float64,
+					Ly::Float64,
+					Lz::Float64,
+					X::Array{Float64, 1},
+					Y::Array{Float64, 1},
+					Z::Array{Float64, 1},
+					Q0::Array{Float64, 1},
+					Q1::Array{Float64, 1},
+					Q2::Array{Float64, 1},
+					Q3::Array{Float64, 1},
+					A11::Array{Float64, 1},
+					A12::Array{Float64, 1},
+					A13::Array{Float64, 1},
+					A21::Array{Float64, 1},
+					A22::Array{Float64, 1},
+					A23::Array{Float64, 1},
+					A31::Array{Float64, 1},
+					A32::Array{Float64, 1},
+					A33::Array{Float64, 1},
+					D0::Float64,
+					deltat_coarse::Float64,
+					number_of_time_points_coarse::Int64,
+					number_of_time_points_fine_per_coarse::Int64,
+					number_of_diffusers::Int64,
+					boundary_condition::String,
+					cell_lists::Array{Array{Int64, 1}, 3})
+
+	#d_min::Float64 = Lx
 
 	# Number of particles.
 	number_of_particles::Int64 = length(X)
@@ -59,7 +61,6 @@ function diffuse(particle_type::String,
 	vx_star::Float64 = 0.0
 	vy_star::Float64 = 0.0
 	vz_star::Float64 = 0.0
-	V::Array{Float64, 1} = zeros(3)
 	current_cell_x::Int64 = 0
 	current_cell_y::Int64 = 0
 	current_cell_z::Int64 = 0
@@ -210,6 +211,40 @@ function diffuse(particle_type::String,
 															A31[current_particle] * vx_star + A32[current_particle] * vy_star + A33[current_particle] * vz_star)
 							if abs(vx_star) <= R[current_particle, 1] && abs(vy_star) <= R[current_particle, 2] && abs(vz_star) <= R[current_particle, 3]
 								is_proposed_position_ok = false
+							#else
+							#	# Redefine vx such that there is no large jump mod(L) between them.
+							#	vx = vx_star - deltax
+							#	vy = vy_star - deltay
+							#	vz = vz_star - deltaz
+							#	# Do line-box intersection test (line-AABB since we are now in the coord sys of the cuboid)
+							#	d1 = 0.5 * (vx_star - vx)
+							#	d2 = 0.5 * (vy_star - vy)
+							#	d3 = 0.5 * (vz_star - vz)
+							#	c1 = vx + d1
+							#	c2 = vy + d2
+							#	c3 = vz + d3
+							#	ad1 = abs(d1)
+							#	ad2 = abs(d2)
+							#	ad3 = abs(d3)
+							#	if (abs(c1) < R[current_particle, 1] + ad1) && (abs(c2) < R[current_particle, 2] + ad2) && (abs(c3) < R[current_particle, 3] + ad3) && (abs(d2 * c3 - d3 * c2) < R[current_particle, 2] * ad3 + R[current_particle, 3] * ad2) && (abs(d3 * c1 - d1 * c3) < R[current_particle, 3] * ad1 + R[current_particle, 1] * ad3) && (abs(d1 * c2 - d2 * c1) < R[current_particle, 1] * ad2 + R[current_particle, 2] * ad1)
+							#	    is_proposed_position_ok = false
+							#	end
+
+								#if (abs(c1) > R[current_particle, 1] + ad1)
+								#    is_intersecting = false;
+								#elseif (abs(c2) > R[current_particle, 2] + ad2)
+								#    is_intersecting = false;
+								#elseif (abs(c3) > R[current_particle, 3] + ad3)
+								#    is_intersecting = false;
+								#elseif (abs(d2 * c3 - d3 * c2) > R[current_particle, 2] * ad3 + R[current_particle, 3] * ad2)
+								#    is_intersecting = false;
+								#elseif (abs(d3 * c1 - d1 * c3) > R[current_particle, 3] * ad1 + R[current_particle, 1] * ad3)
+								#    is_intersecting = false;
+								#elseif (abs(d1 * c2 - d2 * c1) > R[current_particle, 1] * ad2 + R[current_particle, 2] * ad1)
+								#    is_intersecting = false;
+								#else
+								#    is_intersecting = true;
+								#end
 							end
 						end
 					end
@@ -225,6 +260,10 @@ function diffuse(particle_type::String,
 						z_abs = z_abs + deltaz
 
 						D0_empirical = D0_empirical + deltax^2 + deltay^2 + deltaz^2
+
+						#d_min = min(d_min, max(abs(x-0.5*Lx)/R[current_particle, 1], abs(y-0.5*Ly)/R[current_particle, 2], abs(z-0.5*Lz)/R[current_particle, 3]) )
+
+
 					end
 				elseif boundary_condition == "multiple-rejection"
 					is_proposed_position_ok = false
@@ -284,6 +323,9 @@ function diffuse(particle_type::String,
 					z_abs = z_abs + deltaz
 
 					D0_empirical = D0_empirical + deltax^2 + deltay^2 + deltaz^2
+
+					#d_min = min(d_min, max(abs(x-0.5*Lx)/R[current_particle, 1], abs(y-0.5*Ly)/R[current_particle, 2], abs(z-0.5*Lz)/R[current_particle, 3]) )
+
 				end
 			end
 
@@ -303,7 +345,7 @@ function diffuse(particle_type::String,
 		#end
 		#chunk = convert(Int64, floor(t_elapsed_diffusion / 10.0))
 	end
-
+	#println(d_min)
 	output::Array{Float64, 1} = vcat(ssd, ssd_x, ssd_y, ssd_z, D0_empirical)
 	return output
 end

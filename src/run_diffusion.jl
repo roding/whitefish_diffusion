@@ -209,6 +209,11 @@ function run_diffusion()
 			boundary_condition,
 			cell_lists)
 	end
+
+	# Kill all workers.
+	#rmprocs(workers(); waitfor = typemax(Int))
+
+	# Process output.
 	msd::Array{Float64, 1} = output[1:number_of_time_points_coarse] ./ convert(Float64, 3 * number_of_diffusers)
 	msd_x::Array{Float64, 1} = output[number_of_time_points_coarse+1:2*number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)
 	msd_y::Array{Float64, 1} = output[2*number_of_time_points_coarse+1:3*number_of_time_points_coarse] ./ convert(Float64, number_of_diffusers)
@@ -231,6 +236,7 @@ function run_diffusion()
 		t_exec)
 	println(join(("Output written to ", output_file_path, ".")))
 	println("Finished.")
+	println(msd[end]/(2.0*(convert(Float64, number_of_time_points_coarse-1) * deltat_coarse)))
 
 	nothing
 end
