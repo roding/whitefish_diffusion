@@ -13,6 +13,11 @@ include("inverse_characteristic_matrix_ellipsoid.jl")
 include("rotation_matrix.jl")
 include("inverse_rotation_matrix.jl")
 
+include("generate_cell_lists.jl")
+include("overlap_cuboid_binary.jl")
+include("axis_aligned_bounding_box.jl")
+include("intersect_box_box.jl")
+
 
 foo = @__FILE__
 @eval @everywhere f = $foo
@@ -21,9 +26,7 @@ foo = @__FILE__
 @everywhere include(joinpath(program_file_dir, "diffuse.jl"))
 @everywhere include(joinpath(program_file_dir, "signed_distance_mod.jl"))
 @everywhere include(joinpath(program_file_dir, "position_mod.jl"))
-@everywhere include(joinpath(program_file_dir, "generate_cell_lists.jl"))
-@everywhere include(joinpath(program_file_dir, "axis_aligned_bounding_box.jl"))
-@everywhere include(joinpath(program_file_dir, "intersect_box_box.jl"))
+
 
 function run_diffusion()
 	# Inititalization of random number generation device.
