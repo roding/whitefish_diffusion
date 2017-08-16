@@ -171,7 +171,7 @@ function run_diffusion()
 	mean_number_of_particles_per_cell /= length(cell_lists)
 	#	println(cell_lists)
 	println(mean_number_of_particles_per_cell)
-	return
+	#return
 
 	# Simulate diffusion.
 	number_of_workers::Int64 = nworkers() # This is determined by the the '-p' input flag to Julia.
