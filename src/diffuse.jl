@@ -75,7 +75,7 @@ function diffuse(	particle_type::String,
 
 	chunk::Int64 = 0
 	for current_diffuser = 1:number_of_diffusers
-		if mod(current_diffuser, 1) == 0
+		if mod(current_diffuser, 10) == 0
 			println(current_diffuser)
 		end
 
@@ -225,6 +225,7 @@ function diffuse(	particle_type::String,
 															A31[current_cell_list[current_particle_in_cell]] * vx_star + A32[current_cell_list[current_particle_in_cell]] * vy_star + A33[current_cell_list[current_particle_in_cell]] * vz_star)
 							if abs(vx_star) <= R[current_cell_list[current_particle_in_cell], 1] && abs(vy_star) <= R[current_cell_list[current_particle_in_cell], 2] && abs(vz_star) <= R[current_cell_list[current_particle_in_cell], 3]
 								is_proposed_position_ok = false
+							end
 								#println()
 							#else
 							#	# Redefine vx such that there is no large jump mod(L) between them.
@@ -241,26 +242,26 @@ function diffuse(	particle_type::String,
 							#	ad1 = abs(d1)
 							#	ad2 = abs(d2)
 							#	ad3 = abs(d3)
-							#	if (abs(c1) < R[current_cell_list[current_particle_in_cell], 1] + ad1) && (abs(c2) < R[current_cell_list[current_particle_in_cell], 2] + ad2) && (abs(c3) < R[current_cell_list[current_particle_in_cell], 3] + ad3) && (abs(d2 * c3 - d3 * c2) < R[current_cell_list[current_particle_in_cell], 2] * ad3 + R[current_cell_list[current_particle_in_cell], 3] * ad2) && (abs(d3 * c1 - d1 * c3) < R[current_cell_list[current_particle_in_cell], 3] * ad1 + R[current_cell_list[current_particle_in_cell], 1] * ad3) && (abs(d1 * c2 - d2 * c1) < R[current_cell_list[current_particle_in_cell], 1] * ad2 + R[current_cell_list[current_particle_in_cell], 2] * ad1)
+							#	if !((abs(c1) < R[current_cell_list[current_particle_in_cell], 1] + ad1) && (abs(c2) < R[current_cell_list[current_particle_in_cell], 2] + ad2) && (abs(c3) < R[current_cell_list[current_particle_in_cell], 3] + ad3) && (abs(d2 * c3 - d3 * c2) < R[current_cell_list[current_particle_in_cell], 2] * ad3 + R[current_cell_list[current_particle_in_cell], 3] * ad2) && (abs(d3 * c1 - d1 * c3) < R[current_cell_list[current_particle_in_cell], 3] * ad1 + #R[current_cell_list[current_particle_in_cell], 1] * ad3) && (abs(d1 * c2 - d2 * c1) < R[current_cell_list[current_particle_in_cell], 1] * ad2 + R[current_cell_list[current_particle_in_cell], 2] * ad1))
 							#	    is_proposed_position_ok = false
+							#	end#
+							#
+							#	if (abs(c1) > R[current_cell_list[current_particle_in_cell], 1] + ad1)
+							#	    is_intersecting = false
+							#	elseif (abs(c2) > R[current_cell_list[current_particle_in_cell], 2] + ad2)
+							#	    is_intersecting = false
+							#	elseif (abs(c3) > R[current_cell_list[current_particle_in_cell], 3] + ad3)
+							#	    is_intersecting = false
+							#	elseif (abs(d2 * c3 - d3 * c2) > R[current_cell_list[current_particle_in_cell], 2] * ad3 + R[current_cell_list[current_particle_in_cell], 3] * ad2)
+							#	    is_intersecting = false
+							#	elseif (abs(d3 * c1 - d1 * c3) > R[current_cell_list[current_particle_in_cell], 3] * ad1 + R[current_cell_list[current_particle_in_cell], 1] * ad3)
+							#	    is_intersecting = false
+							#	elseif (abs(d1 * c2 - d2 * c1) > R[current_cell_list[current_particle_in_cell], 1] * ad2 + R[current_cell_list[current_particle_in_cell], 2] * ad1)
+							#	    is_intersecting = false
+							#	else
+							#	    is_intersecting = true
 							#	end
-
-								#if (abs(c1) > R[current_cell_list[current_particle_in_cell], 1] + ad1)
-								#    is_intersecting = false;
-								#elseif (abs(c2) > R[current_cell_list[current_particle_in_cell], 2] + ad2)
-								#    is_intersecting = false;
-								#elseif (abs(c3) > R[current_cell_list[current_particle_in_cell], 3] + ad3)
-								#    is_intersecting = false;
-								#elseif (abs(d2 * c3 - d3 * c2) > R[current_cell_list[current_particle_in_cell], 2] * ad3 + R[current_cell_list[current_particle_in_cell], 3] * ad2)
-								#    is_intersecting = false;
-								#elseif (abs(d3 * c1 - d1 * c3) > R[current_cell_list[current_particle_in_cell], 3] * ad1 + R[current_cell_list[current_particle_in_cell], 1] * ad3)
-								#    is_intersecting = false;
-								#elseif (abs(d1 * c2 - d2 * c1) > R[current_cell_list[current_particle_in_cell], 1] * ad2 + R[current_cell_list[current_particle_in_cell], 2] * ad1)
-								#    is_intersecting = false;
-								#else
-								#    is_intersecting = true;
-								#end
-							end
+							#end
 						end
 					end
 
