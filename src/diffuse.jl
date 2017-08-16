@@ -79,7 +79,7 @@ function diffuse(	particle_type::String,
 
 	chunk::Int64 = 0
 	for current_diffuser = 1:number_of_diffusers
-		if mod(current_diffuser, 10) == 0
+		if mod(current_diffuser, 1) == 0
 			println(current_diffuser)
 		end
 

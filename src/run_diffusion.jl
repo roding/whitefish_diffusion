@@ -161,14 +161,14 @@ function run_diffusion()
 																number_of_cells_y,
 																number_of_cells_z,
 																cell_overlap)
-#	mean_number_of_particles_per_cell::Float64 = 0.0
-#	for i = 1:length(cell_lists)
-#		mean_number_of_particles_per_cell += length(cell_lists[i])
-#	end
-#	mean_number_of_particles_per_cell /= length(cell_lists)
-#	#	println(cell_lists)
-#	println(mean_number_of_particles_per_cell)
-#	return
+	mean_number_of_particles_per_cell::Float64 = 0.0
+	for i = 1:length(cell_lists)
+		mean_number_of_particles_per_cell += length(cell_lists[i])
+	end
+	mean_number_of_particles_per_cell /= length(cell_lists)
+	#	println(cell_lists)
+	println(mean_number_of_particles_per_cell)
+	return
 
 	# Simulate diffusion.
 	number_of_workers::Int64 = nworkers() # This is determined by the the '-p' input flag to Julia.
