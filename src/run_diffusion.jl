@@ -142,6 +142,19 @@ function run_diffusion()
 			A32[current_particle] = a32
 			A33[current_particle] = a33
 		end
+	elseif particle_type == "superellipsoid"
+		for current_particle = 1:number_of_particles
+			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle])
+			A11[current_particle] = a11
+			A12[current_particle] = a12
+			A13[current_particle] = a13
+			A21[current_particle] = a21
+			A22[current_particle] = a22
+			A23[current_particle] = a23
+			A31[current_particle] = a31
+			A32[current_particle] = a32
+			A33[current_particle] = a33
+		end
 	end
 
 	# Create cell lists.

@@ -15,6 +15,8 @@ function read_output_generation(file_path::String)
 		number_of_properties = 3
 	elseif particle_type == "cuboid"
 		number_of_properties = 3
+	elseif particle_type == "superellipsoid"
+		number_of_properties = 4
 	end
 	number_of_particles::Int64 = length(R_temp) / number_of_properties
 	R::Array{Float64, 2} = reshape(R_temp, number_of_particles, number_of_properties)

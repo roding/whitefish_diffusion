@@ -123,6 +123,29 @@ function generate_cell_lists(	particle_type::String,
 				end
 			end
 		end
+	elseif particle_type == "superellipsoid"
+		# For now we approximate the ellipsoid with its OBB i.e. the bounding cuboid with the same semi-axes.
+		# Should implement the exact test later because there will be some false positives now.
+		for current_cell_x = 1:number_of_cells_x
+			for current_cell_y = 1:number_of_cells_y
+				for current_cell_z = 1:number_of_cells_z
+					for current_particle = 1:number_of_particles
+						xAB = signed_distance_mod(X[current_particle], 0.5 * (lbx_cell[current_cell_x] + ubx_cell[current_cell_x]), Lx)
+						yAB = signed_distance_mod(Y[current_particle], 0.5 * (lby_cell[current_cell_y] + uby_cell[current_cell_y]), Ly)
+						zAB = signed_distance_mod(Z[current_particle], 0.5 * (lbz_cell[current_cell_z] + ubz_cell[current_cell_z]), Lz)
+						(a11, a12, a13, a21, a22, a23, a31, a32, a33) = rotation_matrix(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle])
+						if overlap_cuboid_binary(xAB, yAB, zAB, a11, a12, a13, a21, a22, a23, a31, a32, a33, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0,
+							R[current_particle, 1], R[current_particle, 2], R[current_particle, 3],
+							0.5 * (ubx_cell[current_cell_x] - lbx_cell[current_cell_x]),
+							0.5 * (uby_cell[current_cell_y] - lby_cell[current_cell_y]),
+							0.5 * (ubz_cell[current_cell_z] - lbz_cell[current_cell_z])) == 1.0
+
+							push!(cell_lists[current_cell_x, current_cell_y, current_cell_z], current_particle)
+						end
+					end
+				end
+			end
+		end
 	end
 
 	return cell_lists

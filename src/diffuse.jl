@@ -165,6 +165,37 @@ function diffuse(	particle_type::String,
 					end
 				end
 			end
+		elseif particle_type == "superellipsoid"
+			is_proposed_position_ok = false
+			while !is_proposed_position_ok
+				x = Lx * rand()
+				y = Ly * rand()
+				z = Lz * rand()
+
+				current_cell_x = convert(Int64, ceil(x / Lx * convert(Float64, number_of_cells_x)))
+				current_cell_y = convert(Int64, ceil(y / Ly * convert(Float64, number_of_cells_y)))
+				current_cell_z = convert(Int64, ceil(z / Lz * convert(Float64, number_of_cells_z)))
+				number_of_particles_current_cell = length(cell_lists[current_cell_x, current_cell_y, current_cell_z])
+				current_cell_list = cell_lists[current_cell_x, current_cell_y, current_cell_z]
+
+				is_proposed_position_ok = true
+				current_particle_in_cell = 0
+				while current_particle_in_cell < number_of_particles_current_cell && is_proposed_position_ok
+					current_particle_in_cell += 1
+					vx = signed_distance_mod(x, X[current_cell_list[current_particle_in_cell]], Lx)
+					vy = signed_distance_mod(y, Y[current_cell_list[current_particle_in_cell]], Ly)
+					vz = signed_distance_mod(z, Z[current_cell_list[current_particle_in_cell]], Lz)
+					(vx, vy, vz) = (A11[current_cell_list[current_particle_in_cell]] * vx + A12[current_cell_list[current_particle_in_cell]] * vy + A13[current_cell_list[current_particle_in_cell]] * vz,
+									A21[current_cell_list[current_particle_in_cell]] * vx + A22[current_cell_list[current_particle_in_cell]] * vy + A23[current_cell_list[current_particle_in_cell]] * vz,
+									A31[current_cell_list[current_particle_in_cell]] * vx + A32[current_cell_list[current_particle_in_cell]] * vy + A33[current_cell_list[current_particle_in_cell]] * vz)
+
+					if (abs(vx)/R[current_cell_list[current_particle_in_cell], 1])^R[current_cell_list[current_particle_in_cell], 4] +
+						(abs(vy)/R[current_cell_list[current_particle_in_cell], 2])^R[current_cell_list[current_particle_in_cell], 4] +
+						(abs(vz)/R[current_cell_list[current_particle_in_cell], 3])^R[current_cell_list[current_particle_in_cell], 4] <= 1.0
+						is_proposed_position_ok = false
+					end
+				end
+			end
 		end
 
 		x_abs = x
@@ -226,42 +257,18 @@ function diffuse(	particle_type::String,
 							if abs(vx_star) <= R[current_cell_list[current_particle_in_cell], 1] && abs(vy_star) <= R[current_cell_list[current_particle_in_cell], 2] && abs(vz_star) <= R[current_cell_list[current_particle_in_cell], 3]
 								is_proposed_position_ok = false
 							end
-								#println()
-							#else
-							#	# Redefine vx such that there is no large jump mod(L) between them.
-							#	vx = vx_star - deltax
-							#	vy = vy_star - deltay
-							#	vz = vz_star - deltaz
-							#	# Do line-box intersection test (line-AABB since we are now in the coord sys of the cuboid)
-							#	d1 = 0.5 * (vx_star - vx)
-							#	d2 = 0.5 * (vy_star - vy)
-							#	d3 = 0.5 * (vz_star - vz)
-							#	c1 = vx + d1
-							#	c2 = vy + d2
-							#	c3 = vz + d3
-							#	ad1 = abs(d1)
-							#	ad2 = abs(d2)
-							#	ad3 = abs(d3)
-							#	if !((abs(c1) < R[current_cell_list[current_particle_in_cell], 1] + ad1) && (abs(c2) < R[current_cell_list[current_particle_in_cell], 2] + ad2) && (abs(c3) < R[current_cell_list[current_particle_in_cell], 3] + ad3) && (abs(d2 * c3 - d3 * c2) < R[current_cell_list[current_particle_in_cell], 2] * ad3 + R[current_cell_list[current_particle_in_cell], 3] * ad2) && (abs(d3 * c1 - d1 * c3) < R[current_cell_list[current_particle_in_cell], 3] * ad1 + #R[current_cell_list[current_particle_in_cell], 1] * ad3) && (abs(d1 * c2 - d2 * c1) < R[current_cell_list[current_particle_in_cell], 1] * ad2 + R[current_cell_list[current_particle_in_cell], 2] * ad1))
-							#	    is_proposed_position_ok = false
-							#	end#
-							#
-							#	if (abs(c1) > R[current_cell_list[current_particle_in_cell], 1] + ad1)
-							#	    is_intersecting = false
-							#	elseif (abs(c2) > R[current_cell_list[current_particle_in_cell], 2] + ad2)
-							#	    is_intersecting = false
-							#	elseif (abs(c3) > R[current_cell_list[current_particle_in_cell], 3] + ad3)
-							#	    is_intersecting = false
-							#	elseif (abs(d2 * c3 - d3 * c2) > R[current_cell_list[current_particle_in_cell], 2] * ad3 + R[current_cell_list[current_particle_in_cell], 3] * ad2)
-							#	    is_intersecting = false
-							#	elseif (abs(d3 * c1 - d1 * c3) > R[current_cell_list[current_particle_in_cell], 3] * ad1 + R[current_cell_list[current_particle_in_cell], 1] * ad3)
-							#	    is_intersecting = false
-							#	elseif (abs(d1 * c2 - d2 * c1) > R[current_cell_list[current_particle_in_cell], 1] * ad2 + R[current_cell_list[current_particle_in_cell], 2] * ad1)
-							#	    is_intersecting = false
-							#	else
-							#	    is_intersecting = true
-							#	end
-							#end
+						elseif particle_type == "superellipsoid"
+							vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle_in_cell]], Lx)
+							vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle_in_cell]], Ly)
+							vz_star = signed_distance_mod(z_star, Z[current_cell_list[current_particle_in_cell]], Lz)
+							(vx_star, vy_star, vz_star) = (	A11[current_cell_list[current_particle_in_cell]] * vx_star + A12[current_cell_list[current_particle_in_cell]] * vy_star + A13[current_cell_list[current_particle_in_cell]] * vz_star,
+															A21[current_cell_list[current_particle_in_cell]] * vx_star + A22[current_cell_list[current_particle_in_cell]] * vy_star + A23[current_cell_list[current_particle_in_cell]] * vz_star,
+															A31[current_cell_list[current_particle_in_cell]] * vx_star + A32[current_cell_list[current_particle_in_cell]] * vy_star + A33[current_cell_list[current_particle_in_cell]] * vz_star)
+							if (abs(vx_star)/R[current_cell_list[current_particle_in_cell], 1])^R[current_cell_list[current_particle_in_cell], 4] +
+								(abs(vy_star)/R[current_cell_list[current_particle_in_cell], 2])^R[current_cell_list[current_particle_in_cell], 4] +
+								(abs(vz_star)/R[current_cell_list[current_particle_in_cell], 3])^R[current_cell_list[current_particle_in_cell], 4] <= 1.0
+								is_proposed_position_ok = false
+							end
 						end
 					end
 
@@ -323,6 +330,18 @@ function diffuse(	particle_type::String,
 																A21[current_cell_list[current_particle_in_cell]] * vx_star + A22[current_cell_list[current_particle_in_cell]] * vy_star + A23[current_cell_list[current_particle_in_cell]] * vz_star,
 																A31[current_cell_list[current_particle_in_cell]] * vx_star + A32[current_cell_list[current_particle_in_cell]] * vy_star + A33[current_cell_list[current_particle_in_cell]] * vz_star)
 								if abs(vx_star) <= R[current_cell_list[current_particle_in_cell], 1] && abs(vy_star) <= R[current_cell_list[current_particle_in_cell], 2] && abs(vz_star) <= R[current_cell_list[current_particle_in_cell], 3]
+									is_proposed_position_ok = false
+								end
+							elseif particle_type == "superellipsoid"
+								vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle_in_cell]], Lx)
+								vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle_in_cell]], Ly)
+								vz_star = signed_distance_mod(z_star, Z[current_cell_list[current_particle_in_cell]], Lz)
+								(vx_star, vy_star, vz_star) = (	A11[current_cell_list[current_particle_in_cell]] * vx_star + A12[current_cell_list[current_particle_in_cell]] * vy_star + A13[current_cell_list[current_particle_in_cell]] * vz_star,
+																A21[current_cell_list[current_particle_in_cell]] * vx_star + A22[current_cell_list[current_particle_in_cell]] * vy_star + A23[current_cell_list[current_particle_in_cell]] * vz_star,
+																A31[current_cell_list[current_particle_in_cell]] * vx_star + A32[current_cell_list[current_particle_in_cell]] * vy_star + A33[current_cell_list[current_particle_in_cell]] * vz_star)
+								if (abs(vx_star)/R[current_cell_list[current_particle_in_cell], 1])^R[current_cell_list[current_particle_in_cell], 4] +
+									(abs(vy_star)/R[current_cell_list[current_particle_in_cell], 2])^R[current_cell_list[current_particle_in_cell], 4] +
+									(abs(vz_star)/R[current_cell_list[current_particle_in_cell], 3])^R[current_cell_list[current_particle_in_cell], 4] <= 1.0
 									is_proposed_position_ok = false
 								end
 
