@@ -27,8 +27,6 @@ function diffuse(	particle_type::String,
 					boundary_condition::String,
 					cell_lists::Array{Array{Int64, 1}, 3})
 
-	#d_min::Float64 = Lx
-
 	# Standard deviation of Gaussian jumps.
 	deltat_fine::Float64 = deltat_coarse / convert(Float64, number_of_time_points_fine_per_coarse)
 	sigma::Float64 = sqrt(2.0 * D0 * deltat_fine)
@@ -57,6 +55,15 @@ function diffuse(	particle_type::String,
 	vx_star::Float64 = 0.0
 	vy_star::Float64 = 0.0
 	vz_star::Float64 = 0.0
+	w1::Float64 = 0.0
+	w1_star::Float64 = 0.0
+	w2::Float64 = 0.0
+	w2_star::Float64 = 0.0
+	w3::Float64 = 0.0
+	w3_star::Float64 = 0.0
+	w1_intersection::Float64 = 0.0
+	w2_intersection::Float64 = 0.0
+	alpha::Float64 = 0.0
 	current_cell_x::Int64 = 0
 	current_cell_y::Int64 = 0
 	current_cell_z::Int64 = 0
@@ -239,7 +246,32 @@ function diffuse(	particle_type::String,
 								is_proposed_position_ok = false
 							end
 						elseif particle_type == "ellipse"
+							# Make sure we can detect intersection by ensuring that v and v_star are close, not just close mod L.
+							# Ellipse is a bit special in this regard.
 
+							# Observe that the arguments to signed_distance_mod are shifted. Calling them
+							# the same way as in other place will lead to wrong sign of distances.
+							vx = signed_distance_mod(X[current_cell_list[current_particle_in_cell]], x, Lx)
+							vy = signed_distance_mod(Y[current_cell_list[current_particle_in_cell]], y, Ly)
+							vz = signed_distance_mod(Z[current_cell_list[current_particle_in_cell]], z, Lz)
+							vx_star = vx + deltax
+							vy_star = vy + deltay
+							vz_star = vz + deltaz
+							(vx, vy, vz) = (				A11[current_cell_list[current_particle_in_cell]] * vx +	A12[current_cell_list[current_particle_in_cell]] * vy + A13[current_cell_list[current_particle_in_cell]] * vz,
+															A21[current_cell_list[current_particle_in_cell]] * vx + A22[current_cell_list[current_particle_in_cell]] * vy + A23[current_cell_list[current_particle_in_cell]] * vz,
+															A31[current_cell_list[current_particle_in_cell]] * vx + A32[current_cell_list[current_particle_in_cell]] * vy + A33[current_cell_list[current_particle_in_cell]] * vz)
+							(vx_star, vy_star, vz_star) = (	A11[current_cell_list[current_particle_in_cell]] * vx_star + A12[current_cell_list[current_particle_in_cell]] * vy_star + A13[current_cell_list[current_particle_in_cell]] * vz_star,
+															A21[current_cell_list[current_particle_in_cell]] * vx_star + A22[current_cell_list[current_particle_in_cell]] * vy_star + A23[current_cell_list[current_particle_in_cell]] * vz_star,
+															A31[current_cell_list[current_particle_in_cell]] * vx_star + A32[current_cell_list[current_particle_in_cell]] * vy_star + A33[current_cell_list[current_particle_in_cell]] * vz_star)
+
+							alpha = - vz_star / (vz - vz_star)
+							if 0.0 < alpha < 1.0
+								w1_intersection = alpha * vx + (1.0 - alpha) * vx_star
+								w2_intersection = alpha * vy + (1.0 - alpha) * vy_star
+								if (w1_intersection/R[current_cell_list[current_particle_in_cell], 1])^2 + (w2_intersection/R[current_cell_list[current_particle_in_cell], 2])^2 < 1.0
+									is_proposed_position_ok = false
+								end
+							end
 						elseif particle_type == "ellipsoid"
 							vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle_in_cell]], Lx)
 							vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle_in_cell]], Ly)
@@ -284,9 +316,6 @@ function diffuse(	particle_type::String,
 
 						D0_empirical = D0_empirical + deltax^2 + deltay^2 + deltaz^2
 
-						#d_min = min(d_min, max(abs(x-0.5*Lx)/R[current_cell_list[current_particle_in_cell], 1], abs(y-0.5*Ly)/R[current_cell_list[current_particle_in_cell], 2], abs(z-0.5*Lz)/R[current_cell_list[current_particle_in_cell], 3]) )
-
-
 					end
 				elseif boundary_condition == "multiple-rejection"
 					is_proposed_position_ok = false
@@ -314,7 +343,32 @@ function diffuse(	particle_type::String,
 									is_proposed_position_ok = false
 								end
 							elseif particle_type == "ellipse"
+								# Make sure we can detect intersection by ensuring that v and v_star are close, not just close mod L.
+							   	# Ellipse is a bit special in this regard.
 
+								# Observe that the arguments to signed_distance_mod are shifted. Calling them
+								# the same way as in other place will lead to wrong sign of distances.
+								vx = signed_distance_mod(X[current_cell_list[current_particle_in_cell]], x, Lx)
+								vy = signed_distance_mod(Y[current_cell_list[current_particle_in_cell]], y, Ly)
+								vz = signed_distance_mod(Z[current_cell_list[current_particle_in_cell]], z, Lz)
+								vx_star = vx + deltax
+								vy_star = vy + deltay
+								vz_star = vz + deltaz
+								(vx, vy, vz) = (				A11[current_cell_list[current_particle_in_cell]] * vx +	A12[current_cell_list[current_particle_in_cell]] * vy + A13[current_cell_list[current_particle_in_cell]] * vz,
+													   			A21[current_cell_list[current_particle_in_cell]] * vx + A22[current_cell_list[current_particle_in_cell]] * vy + A23[current_cell_list[current_particle_in_cell]] * vz,
+													   			A31[current_cell_list[current_particle_in_cell]] * vx + A32[current_cell_list[current_particle_in_cell]] * vy + A33[current_cell_list[current_particle_in_cell]] * vz)
+								(vx_star, vy_star, vz_star) = (	A11[current_cell_list[current_particle_in_cell]] * vx_star + A12[current_cell_list[current_particle_in_cell]] * vy_star + A13[current_cell_list[current_particle_in_cell]] * vz_star,
+													   			A21[current_cell_list[current_particle_in_cell]] * vx_star + A22[current_cell_list[current_particle_in_cell]] * vy_star + A23[current_cell_list[current_particle_in_cell]] * vz_star,
+													   			A31[current_cell_list[current_particle_in_cell]] * vx_star + A32[current_cell_list[current_particle_in_cell]] * vy_star + A33[current_cell_list[current_particle_in_cell]] * vz_star)
+
+								alpha = - vz_star / (vz - vz_star)
+								if 0.0 < alpha < 1.0
+									w1_intersection = alpha * vx + (1.0 - alpha) * vx_star
+									w2_intersection = alpha * vy + (1.0 - alpha) * vy_star
+									if (w1_intersection/R[current_cell_list[current_particle_in_cell], 1])^2 + (w2_intersection/R[current_cell_list[current_particle_in_cell], 2])^2 < 1.0
+										is_proposed_position_ok = false
+									end
+								end
 							elseif particle_type == "ellipsoid"
 								vx_star = signed_distance_mod(x_star, X[current_cell_list[current_particle_in_cell]], Lx)
 								vy_star = signed_distance_mod(y_star, Y[current_cell_list[current_particle_in_cell]], Ly)
@@ -358,9 +412,6 @@ function diffuse(	particle_type::String,
 					z_abs = z_abs + deltaz
 
 					D0_empirical = D0_empirical + deltax^2 + deltay^2 + deltaz^2
-
-					#d_min = min(d_min, max(abs(x-0.5*Lx)/R[current_cell_list[current_particle_in_cell], 1], abs(y-0.5*Ly)/R[current_cell_list[current_particle_in_cell], 2], abs(z-0.5*Lz)/R[current_cell_list[current_particle_in_cell], 3]) )
-
 				end
 			end
 
@@ -373,14 +424,8 @@ function diffuse(	particle_type::String,
 			ssd_y[current_time_coarse] += (trajectory_y[current_time_coarse] - trajectory_y[1])^2
 			ssd_z[current_time_coarse] += (trajectory_z[current_time_coarse] - trajectory_z[1])^2
 		end
-
-		#t_elapsed_diffusion = convert(Float64, time_ns()) / 1e9 - t_start_diffusion
-		#if !silent_mode && convert(Int64, floor(t_elapsed_diffusion / 10.0)) > chunk
-		#	print_progress(t_elapsed_diffusion, current_diffuser, number_of_diffusers)
-		#end
-		#chunk = convert(Int64, floor(t_elapsed_diffusion / 10.0))
 	end
-	#println(d_min)
 	output::Array{Float64, 1} = vcat(ssd, ssd_x, ssd_y, ssd_z, D0_empirical)
+	#output::Array{Float64, 1} = vcat(ssd, trajectory_x, trajectory_y, trajectory_z, D0_empirical)
 	return output
 end

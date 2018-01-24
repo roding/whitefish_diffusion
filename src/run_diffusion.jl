@@ -21,7 +21,7 @@ include("intersect_box_box.jl")
 
 foo = @__FILE__
 @eval @everywhere f = $foo
-@everywhere println(f)
+#@everywhere println(f)
 @everywhere (program_file_dir, program_file_name) = splitdir(f)
 @everywhere include(joinpath(program_file_dir, "diffuse.jl"))
 @everywhere include(joinpath(program_file_dir, "signed_distance_mod.jl"))
@@ -105,16 +105,16 @@ function run_diffusion()
 	a33::Float64 = 0.0
 	if particle_type == "ellipse"
 		for current_particle = 1:number_of_particles
-			#(a11, a12, a13, a21, a22, a23, a31, a32, a33) = characteristic_matrix_ellipse(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle], R[current_particle, 1], R[current_particle, 2])
-			#A11[current_particle] = a11
-			#A12[current_particle] = a12
-			#A13[current_particle] = a13
-			#A21[current_particle] = a21
-			#A22[current_particle] = a22
-			#A23[current_particle] = a23
-			#A31[current_particle] = a31
-			#A32[current_particle] = a32
-			#A33[current_particle] = a33
+			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0[current_particle], Q1[current_particle], Q2[current_particle], Q3[current_particle])
+			A11[current_particle] = a11
+			A12[current_particle] = a12
+			A13[current_particle] = a13
+			A21[current_particle] = a21
+			A22[current_particle] = a22
+			A23[current_particle] = a23
+			A31[current_particle] = a31
+			A32[current_particle] = a32
+			A33[current_particle] = a33
 		end
 	elseif particle_type == "ellipsoid"
 		for current_particle = 1:number_of_particles
@@ -252,7 +252,7 @@ function run_diffusion()
 		t_exec)
 	println(join(("Output written to ", output_file_path, ".")))
 	println("Finished.")
-	println(msd[end]/(2.0*(convert(Float64, number_of_time_points_coarse-1) * deltat_coarse)))
+	println(msd_z[end]/(2.0*(convert(Float64, number_of_time_points_coarse-1) * deltat_coarse)))
 
 	nothing
 end
