@@ -3,8 +3,10 @@ function read_input(file_path::String)
 	file_string::String = readstring(file_stream)
 	close(file_stream)
 
-	output_generation_path::String = read_key(file_string, "output_generation_path", String)
-	diffusion_coefficient::Float64 = read_key(file_string, "diffusion_coefficient", Float64)
+	solid_structure_path::String = read_key(file_string, "solid_structure_path", String)
+	diffusion_map_path::String = read_key(file_string, "diffusion_map_path", String)
+	D0::Float64 = read_key(file_string, "D0", Float64)
+	D1::Float64 = read_key(file_string, "D1", Float64)
 	deltat_coarse::Float64 = read_key(file_string, "deltat_coarse", Float64)
 	number_of_time_points_coarse::Int64 = read_key(file_string, "number_of_time_points_coarse", Int64)
 	number_of_time_points_fine_per_coarse::Int64 = read_key(file_string, "number_of_time_points_fine_per_coarse", Int64)
@@ -16,8 +18,10 @@ function read_input(file_path::String)
 	output_file_path::String = read_key(file_string, "output_file_path", String)
 
 	return (
-		output_generation_path,
-		diffusion_coefficient,
+		solid_structure_path,
+		diffusion_map_path,
+		D0,
+		D1,
 		deltat_coarse,
 		number_of_time_points_coarse,
 		number_of_time_points_fine_per_coarse,
