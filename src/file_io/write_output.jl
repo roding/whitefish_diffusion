@@ -1,5 +1,5 @@
 function write_output(	file_path::String,
-						diagnostic_diffusion_coefficient_ratio::Float64,
+						D_empirical::Float64,
 						deltat_coarse::Float64,
 						number_of_time_points_coarse::Int64,
 						msd::Array{Float64, 1},
@@ -13,13 +13,13 @@ function write_output(	file_path::String,
 
 	@printf(file_stream, "%s", "<output_diffusion>\n")
 
-	write_key(file_stream, "diagnostic_diffusion_coefficient_ratio", diagnostic_diffusion_coefficient_ratio)
-	write_key(file_stream, "time", t)
-	write_key(file_stream, "mean_square_displacement", msd)
-	write_key(file_stream, "mean_square_displacement_x", msd_x)
-	write_key(file_stream, "mean_square_displacement_y", msd_y)
-	write_key(file_stream, "mean_square_displacement_z", msd_z)
-	write_key(file_stream, "execution_time", t_exec)
+	write_key(file_stream, "D_empirical", D_empirical)
+	write_key(file_stream, "t", t)
+	write_key(file_stream, "msd", msd)
+	write_key(file_stream, "msd_x", msd_x)
+	write_key(file_stream, "msd_y", msd_y)
+	write_key(file_stream, "msd_z", msd_z)
+	write_key(file_stream, "t_exec", t_exec)
 
 	@printf(file_stream, "%s", "</output_diffusion>")
 
