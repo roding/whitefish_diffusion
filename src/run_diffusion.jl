@@ -18,7 +18,6 @@ include("overlap_cuboid_binary.jl")
 include("axis_aligned_bounding_box.jl")
 include("intersect_box_box.jl")
 
-
 foo = @__FILE__
 @eval @everywhere f = $foo
 #@everywhere println(f)
@@ -149,46 +148,7 @@ function run_diffusion()
 	A31_ss::Array{Float64, 1} = zeros(number_of_particles_ss)
 	A32_ss::Array{Float64, 1} = zeros(number_of_particles_ss)
 	A33_ss::Array{Float64, 1} = zeros(number_of_particles_ss)
-	if particle_type_ss == "ellipse"
-		for current_particle = 1:number_of_particles_ss
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0_ss[current_particle], Q1_ss[current_particle], Q2_ss[current_particle], Q3_ss[current_particle])
-			A11_ss[current_particle] = a11
-			A12_ss[current_particle] = a12
-			A13_ss[current_particle] = a13
-			A21_ss[current_particle] = a21
-			A22_ss[current_particle] = a22
-			A23_ss[current_particle] = a23
-			A31_ss[current_particle] = a31
-			A32_ss[current_particle] = a32
-			A33_ss[current_particle] = a33
-		end
-	elseif particle_type_ss == "ellipsoid"
-		for current_particle = 1:number_of_particles_ss
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_characteristic_matrix_ellipsoid(Q0_ss[current_particle], Q1_ss[current_particle], Q2_ss[current_particle], Q3_ss[current_particle], R_ss[current_particle, 1], R_ss[current_particle, 2], R_ss[current_particle, 3])
-			A11_ss[current_particle] = a11
-			A12_ss[current_particle] = a12
-			A13_ss[current_particle] = a13
-			A21_ss[current_particle] = a21
-			A22_ss[current_particle] = a22
-			A23_ss[current_particle] = a23
-			A31_ss[current_particle] = a31
-			A32_ss[current_particle] = a32
-			A33_ss[current_particle] = a33
-		end
-	elseif particle_type_ss == "cuboid"
-		for current_particle = 1:number_of_particles_ss
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0_ss[current_particle], Q1_ss[current_particle], Q2_ss[current_particle], Q3_ss[current_particle])
-			A11_ss[current_particle] = a11
-			A12_ss[current_particle] = a12
-			A13_ss[current_particle] = a13
-			A21_ss[current_particle] = a21
-			A22_ss[current_particle] = a22
-			A23_ss[current_particle] = a23
-			A31_ss[current_particle] = a31
-			A32_ss[current_particle] = a32
-			A33_ss[current_particle] = a33
-		end
-	elseif particle_type_ss == "superellipsoid"
+	if particle_type_ss != "sphere"
 		for current_particle = 1:number_of_particles_ss
 			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0_ss[current_particle], Q1_ss[current_particle], Q2_ss[current_particle], Q3_ss[current_particle])
 			A11_ss[current_particle] = a11
@@ -212,46 +172,7 @@ function run_diffusion()
 	A31_dm::Array{Float64, 1} = zeros(number_of_particles_dm)
 	A32_dm::Array{Float64, 1} = zeros(number_of_particles_dm)
 	A33_dm::Array{Float64, 1} = zeros(number_of_particles_dm)
-	if particle_type_dm == "ellipse"
-		for current_particle = 1:number_of_particles_dm
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0_dm[current_particle], Q1_dm[current_particle], Q2_dm[current_particle], Q3_dm[current_particle])
-			A11_dm[current_particle] = a11
-			A12_dm[current_particle] = a12
-			A13_dm[current_particle] = a13
-			A21_dm[current_particle] = a21
-			A22_dm[current_particle] = a22
-			A23_dm[current_particle] = a23
-			A31_dm[current_particle] = a31
-			A32_dm[current_particle] = a32
-			A33_dm[current_particle] = a33
-		end
-	elseif particle_type_dm == "ellipsoid"
-		for current_particle = 1:number_of_particles_dm
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_characteristic_matrix_ellipsoid(Q0_dm[current_particle], Q1_dm[current_particle], Q2_dm[current_particle], Q3_dm[current_particle], R_dm[current_particle, 1], R_dm[current_particle, 2], R_dm[current_particle, 3])
-			A11_dm[current_particle] = a11
-			A12_dm[current_particle] = a12
-			A13_dm[current_particle] = a13
-			A21_dm[current_particle] = a21
-			A22_dm[current_particle] = a22
-			A23_dm[current_particle] = a23
-			A31_dm[current_particle] = a31
-			A32_dm[current_particle] = a32
-			A33_dm[current_particle] = a33
-		end
-	elseif particle_type_dm == "cuboid"
-		for current_particle = 1:number_of_particles_dm
-			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0_dm[current_particle], Q1_dm[current_particle], Q2_dm[current_particle], Q3_dm[current_particle])
-			A11_dm[current_particle] = a11
-			A12_dm[current_particle] = a12
-			A13_dm[current_particle] = a13
-			A21_dm[current_particle] = a21
-			A22_dm[current_particle] = a22
-			A23_dm[current_particle] = a23
-			A31_dm[current_particle] = a31
-			A32_dm[current_particle] = a32
-			A33_dm[current_particle] = a33
-		end
-	elseif particle_type_dm == "superellipsoid"
+	if particle_type_dm != "sphere"
 		for current_particle = 1:number_of_particles_dm
 			(a11, a12, a13, a21, a22, a23, a31, a32, a33) = inverse_rotation_matrix(Q0_dm[current_particle], Q1_dm[current_particle], Q2_dm[current_particle], Q3_dm[current_particle])
 			A11_dm[current_particle] = a11
