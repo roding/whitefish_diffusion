@@ -310,16 +310,13 @@ function run_diffusion()
 	number_of_diffusers_per_worker[1:number_of_diffusers_remaining] += 1
 	println(number_of_diffusers_per_worker)
 
-	output::Array{Float64, 1} = zeros(4*number_of_time_points_coarse+1)
+	output::Array{Float64, 1} = zeros(4 * number_of_time_points_coarse + 1)
 	output = @parallel (+) for current_worker = 1:number_of_workers
 		diffuse(	particle_type_ss, R_ss, X_ss, Y_ss, Z_ss, Q0_ss, Q1_ss, Q2_ss, Q3_ss, A11_ss, A12_ss, A13_ss, A21_ss, A22_ss, A23_ss, A31_ss, A32_ss, A33_ss, cell_lists_ss,
 					particle_type_dm, R_dm, X_dm, Y_dm, Z_dm, Q0_dm, Q1_dm, Q2_dm, Q3_dm, A11_dm, A12_dm, A13_dm, A21_dm, A22_dm, A23_dm, A31_dm, A32_dm, A33_dm, cell_lists_dm,
 					Lx,	Ly,	Lz,	D0, D1, deltat_coarse, number_of_time_points_coarse, number_of_time_points_fine_per_coarse,
 					number_of_diffusers_per_worker[current_worker], boundary_condition)
 	end
-
-	# Kill all workers.
-	#rmprocs(workers(); waitfor = typemax(Int))
 
 	# Process output.
 	msd::Array{Float64, 1} = output[1:number_of_time_points_coarse] ./ convert(Float64, 3 * number_of_diffusers)
